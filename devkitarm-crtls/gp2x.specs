@@ -1,1 +1,8 @@
-/home/adan/dev/gp2x/devkitarm-crtls/gp2x.specs
+%rename link                old_link
+
+*link:
+%(old_link) -T gp2x.ld%s --gc-sections
+
+*startfile:
+gp2x_crt0%O%s crti%O%s crtbegin%O%s
+
