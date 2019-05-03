@@ -1,0 +1,1 @@
+/home/adan/dev/gp2x/devkitarm-crtls/gp2x.ld
