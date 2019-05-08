@@ -7,7 +7,7 @@
     .section	".crt0","ax"
 	.code 32
 	.align
-	.global _start, _undefined_instruction, _software_interrupt, _prefetch_abort, _data_abort, _not_used, _irq, _fiq
+	.global _start, _undefined_instruction, _software_interrupt, _prefetch_abort, _data_abort, _not_used, _irq, _fiq, __int_stack_size, __usr_stack_size
 
         .set  Mode_USR, 0x10
         .set  Mode_FIQ, 0x11
@@ -21,6 +21,7 @@
         .equ  F_Bit, 0x40	
 
         .equ  __int_stack_size, 256
+	.equ  __usr_stack_size, 8192
 
 @---------------------------------------------------------------------------------
 _start:

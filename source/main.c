@@ -1,4 +1,5 @@
 #include <gp2xregs.h>
+#include <orcus.h>
 
 void init() {
   // a little test to see if we can even get the thing to execute, if we can read 0xdeadbeef
@@ -17,6 +18,8 @@ void init() {
 }
 
 int main() {
+  orcus_init();
+  
   init();
   while(1);
 }

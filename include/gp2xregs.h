@@ -7,6 +7,9 @@
 #define r16 volatile uint16_t*
 #define r8 volatile uint8_t*
 
+extern r32 IO_BASE32;
+extern r16 IO_BASE16;
+
 // interrupt vector
 extern r32 _undefined_instruction;
 extern r32 _software_interrupt;
