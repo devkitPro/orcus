@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <gp2xregs.h>
 #include <orcus.h>
 
@@ -19,7 +20,7 @@ void init() {
 
 int main() {
   orcus_init();
-  
+
   init();
   while(1);
 }
