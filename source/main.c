@@ -6,7 +6,7 @@ void init() {
   // a little test to see if we can even get the thing to execute, if we can read 0xdeadbeef
   // from 0x2000 in memory via jtag, the binary is running
   volatile r32 test = (r32) 0x2000;
-  *test = 0xdeadbeea;
+  *test = 0xdeadbeef;
 
   unsigned int test2_data = 0x123;
   volatile r32 test2 = (r32) 0x3000;
