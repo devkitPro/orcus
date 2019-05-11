@@ -16,6 +16,11 @@ extern void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC
 extern void orcus_default_ram_timings();
 extern void orcus_fast_ram_timings();
 
+typedef enum { NONE, ODD, EVEN } Parity;
+extern void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, int stopBits);
+extern char orcus_uart_putc(char c, bool isBlocking);
+extern char orcus_uart_getc(bool isBlocking);
+
 // orcus settings
 typedef struct {
   // SYSCLKENREG

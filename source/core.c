@@ -12,7 +12,7 @@ uint32_t __heap_end;
 _mmsp2_peripheral_clock_enable mmsp2PeripheralClockEnable = {
 							     .externalSystemClock = false,
 							     .adc = true,
-							     .pwm = true,
+							     .pwm = false,
 							     .dma = true,
 							     .timer = true,
 							     .coprocessor = false,
@@ -55,19 +55,22 @@ _mmsp2_peripheral_clock_enable mmsp2PeripheralClockEnable = {
 void orcus_init() {  
   // set up clock sources - default settings when system boots, set here in case something
   // else has messed around with them
-  REG16(FPLLSETVREG) = ((F_MDIV << 8) & (F_PDIV << 2) & F_SDIV);
-  REG16(UPLLSETVREG) = ((U_MDIV << 8) & (U_PDIV << 2) & U_SDIV);
-  REG16(APLLSETVREG) = ((A_MDIV << 8) & (A_PDIV << 2) & A_SDIV);
+  REG16(FPLLSETVREG) = ((F_MDIV << 8) | (F_PDIV << 2) | F_SDIV);
+  REG16(UPLLSETVREG) = ((U_MDIV << 8) | (U_PDIV << 2) | U_SDIV);
+  REG16(APLLSETVREG) = ((A_MDIV << 8) | (A_PDIV << 2) | A_SDIV);
   REG16(CLKMGRREG) = CLKMGRREG_APLL_USE | CLKMGRREG_UPLL_USE;
 
-  // set up UART0 to 115200 bps
-  REG16(URT0CSETREG) = URT0CSETREG_UART0(URTnCSETREG_CLKSRC(APLL_CLK) | URTnCSETREG_CLKDIV(orcus_calculate_uart_diviser(115200)));
+  // set up UART0 to 115200/8N1
+  orcus_configure_uart(115200, 8, NONE, 1);
 
   // disable clocks for unwanted peripherals
   orcus_configure_peripherals();
   
   // set up memory timings
   orcus_default_ram_timings();
+
+  // TODO gpio
+  // TODO lcd
 
   // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
 
@@ -134,3 +137,34 @@ void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int t
 
 void orcus_default_ram_timings() { orcus_set_ram_timings(7, 15, 2, 7, 7, 7, 7); }
 void orcus_fast_ram_timings() { orcus_set_ram_timings(5, 3, 0, 0, 0, 1, 1); }
+
+void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, int stopBits) {
+  REG16(URT0CSETREG) = URT0CSETREG_UART0(URTnCSETREG_CLKSRC(APLL_CLK) | URTnCSETREG_CLKDIV(orcus_calculate_uart_diviser(baudRate)));
+  REG16(LCON0) = LCONx_SIR_MODE(LCONx_SIR_MODE_NORMAL)
+    | LCONx_PARITY(parity == ODD ? LCONx_PARITY_ODD :
+		   parity == EVEN ? LCONx_PARITY_EVEN : LCONx_PARITY_NONE)
+    | LCONx_STOPBIT(stopBits == 2 ? LCONx_STOPBIT_TWO : LCONx_STOPBIT_ONE)
+    | LCONx_WORD_LEN(stopBits == 5 ? LCONx_WORD_LEN_5BITS :
+		     stopBits == 6 ? LCONx_WORD_LEN_6BITS :
+		     stopBits == 7 ? LCONx_WORD_LEN_7BITS : LCONx_WORD_LEN_8BITS);
+  REG16(UCON0) = UCONx_TRANS_MODE(UCONx_MODE_INTPOLL) | UCONx_RECEIVE_MODE(UCONx_MODE_INTPOLL);
+  REG16(FCON0) |= FCONx_FIFO_EN | FCONx_TX_FIFO_RESET | FCONx_RX_FIFO_RESET;
+}
+
+char orcus_uart_putc(char c, bool isBlocking) {
+  if(isBlocking) {
+    while(REG16(FSTATUS0)&FSTATUSx_TX_FIFO_FULL);
+    return REG8(THB0) = c;
+  } else {
+    return REG16(FSTATUS0)&FSTATUSx_TX_FIFO_FULL ? -1 : (REG8(THB0) = c);
+  }
+}
+
+char orcus_uart_getc(bool isBlocking) {
+  if(isBlocking) {
+    while(FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0);
+    return REG8(RHB0);
+  } else {
+    return FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0 ? -1 : REG8(RHB0);
+  }
+}

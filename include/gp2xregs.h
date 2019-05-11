@@ -10,7 +10,9 @@
 
 extern r16 IO_BASE;
 
-#define REG16(x) *((r16) IO_BASE + x)
+#define EG(offset, size) ((volatile r##size) (0xC0000000+offset))
+#define REG8(x) *((volatile r8) (0xC0000000+x))
+#define REG16(x) *((volatile r16) (0xC0000000+x))
 #define BIT(x) (1 << x)
 #define SET(reg, bit, onOff) ((reg&(~bit))|(onOff ? bit : 0))
 
@@ -22,6 +24,8 @@ extern r32 _data_abort;
 extern r32 _not_used;
 extern r32 _irq;
 extern r32 _fiq;
+
+#define REGISTER(name, offset, size) volatile r##size name = (r##size) (0xC0000000+offset)
 
 // clock registers
 #define F_MDIV 0x49
@@ -108,4 +112,72 @@ extern r32 _fiq;
 #define MEMTIMEX0 0x3802
 #define MEMTIMEX1 0x3804
 
+#define LCON0 0x1200
+#define LCON1 0x1220
+#define LCON2 0x1240
+#define LCON3 0x1260
+#define LCONx_SIR_MODE(x) (x << 6)
+#define LCONx_SIR_MODE_NORMAL 0x0
+#define LCONx_SIR_MODE_INFRARED 0x1
+#define LCONx_PARITY(x) (x << 3)
+#define LCONx_PARITY_NONE 0x0
+#define LCONx_PARITY_ODD 0x4
+#define LCONx_PARITY_EVEN 0x5
+#define LCONx_STOPBIT(x) (x << 2)
+#define LCONx_STOPBIT_ONE 0x0
+#define LCONx_STOPBIT_TWO 0x1
+#define LCONx_WORD_LEN(x) (x << 0)
+#define LCONx_WORD_LEN_5BITS 0x0
+#define LCONx_WORD_LEN_6BITS 0x1
+#define LCONx_WORD_LEN_7BITS 0x2
+#define LCONx_WORD_LEN_8BITS 0x3
+
+#define UCON0 0x1202
+#define UCON1 0x1222
+#define UCON2 0x1242
+#define UCON3 0x1262
+#define UCONx_TRANS_MODE(x) (x << 2)
+#define UCONx_RECEIVE_MODE(x) (x << 0)
+#define UCONx_MODE_DISABLE 0x0
+#define UCONx_MODE_INTPOLL 0x1
+#define UCONx_MODE_DMA 0x2
+
+#define FCON0 0x1204  
+#define FCON1 0x1224  
+#define FCON2 0x1244  
+#define FCON3 0x1264  
+#define FCONx_TX_FIFO_RESET BIT(2)
+#define FCONx_RX_FIFO_RESET BIT(1)
+#define FCONx_FIFO_EN BIT(0)
+
+#define ESTATUS0 0x120A
+#define ESTATUS1 0x122A
+#define ESTATUS2 0x124A
+#define ESTATUS3 0x126A
+#define ESTATUSx_BREAK_DETECT BIT(3)
+#define ESTATUSx_FRAME_ERROR BIT(2)
+#define ESTATUSx_PARITY_ERROR BIT(1)
+#define ESTATUSx_OVERRUN_ERROR BIT(0)
+
+#define FSTATUS0 0x120C
+#define FSTATUS1 0x122C
+#define FSTATUS2 0x124C
+#define FSTATUS3 0x126C
+#define FSTATUSx_RX_FIFO_ERROR BIT(10)
+#define FSTATUSx_TX_FIFO_FULL BIT(9)
+#define FSTATUSx_RX_FIFO_FULL BIT(8)
+#define FSTATUSx_TX_FIFO_COUNT(reg) ((REG16(reg)&0xF0)>>4)
+#define FSTATUSx_RX_FIFO_COUNT(reg) (REG16(reg)&0x0F)
+
+// transmit for UARTn - 8 bits
+#define THB0 0x1210
+#define THB1 0x1230
+#define THB2 0x1250
+#define THB3 0x1270
+// receive for UARTn - 8 bits
+#define RHB0 0x1212
+#define RHB1 0x1232
+#define RHB2 0x1252
+#define RHB3 0x1272
+  
 #endif
