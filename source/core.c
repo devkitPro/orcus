@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <gp2xregs.h>
 #include <orcus.h>
-#include <sys/lock.h>
-#include <sys/iosupport.h>
 
 r16 IO_BASE = (r16) 0xC0000000;
 
@@ -83,25 +81,6 @@ void orcus_init() {
   __heap_end = __stack_base - __int_stack_size - __int_stack_size - __usr_stack_size;
   extern void* heap_ptr;
   heap_ptr = (void*)__heap_start;
-  __syscalls.sbrk_r = 0; // TODO - it looks like syscalls is being stored in bss, so why isn't it being zeroed automatically?
-  __syscalls.exit = 0;
-  __syscalls.gettod_r = 0;
-  __syscalls.lock_init = 0;
-  __syscalls.lock_acquire = 0;
-  __syscalls.lock_try_acquire = 0;
-  __syscalls.lock_release = 0;
-  __syscalls.lock_close = 0;
-  __syscalls.lock_init_recursive = 0;
-  __syscalls.lock_acquire_recursive = 0;
-  __syscalls.lock_try_acquire_recursive = 0;
-  __syscalls.lock_release_recursive = 0;
-  __syscalls.lock_close_recursive = 0;
-  __syscalls.getreent = 0;
-  __syscalls.clock_gettime = 0;
-  __syscalls.clock_settime = 0;
-  __syscalls.clock_getres = 0;
-  __syscalls.nanosleep = 0;
-
 }
 
 int orcus_calculate_uart_diviser(int baudRate) {

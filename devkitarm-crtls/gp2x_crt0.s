@@ -98,7 +98,9 @@ _start2:
 	mov		sp, R0
 
 	mov 		R0, #_bss_start
+	ldr 		R0, [R0]
 	mov 		R1, #_bss_end
+	ldr 		R1, [R1]
 	mov		R2, #0
 clear_bss_loop:
 	cmp 		r0, r1
