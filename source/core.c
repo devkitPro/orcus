@@ -1,6 +1,11 @@
 #include <stdint.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <gp2xregs.h>
 #include <orcus.h>
+#include <sys/lock.h>
+#include <sys/iosupport.h>
 
 r16 IO_BASE = (r16) 0xC0000000;
 
@@ -76,8 +81,26 @@ void orcus_init() {
 
   // establish memory map
   __heap_end = __stack_base - __int_stack_size - __int_stack_size - __usr_stack_size;
-  // TODO __syscalls for malloc in newlib
-  // TODO - sys/iosupport.h, __syscalls need s
+  extern void* heap_ptr;
+  heap_ptr = (void*)__heap_start;
+  __syscalls.sbrk_r = 0; // TODO - it looks like syscalls is being stored in bss, so why isn't it being zeroed automatically?
+  __syscalls.exit = 0;
+  __syscalls.gettod_r = 0;
+  __syscalls.lock_init = 0;
+  __syscalls.lock_acquire = 0;
+  __syscalls.lock_try_acquire = 0;
+  __syscalls.lock_release = 0;
+  __syscalls.lock_close = 0;
+  __syscalls.lock_init_recursive = 0;
+  __syscalls.lock_acquire_recursive = 0;
+  __syscalls.lock_try_acquire_recursive = 0;
+  __syscalls.lock_release_recursive = 0;
+  __syscalls.lock_close_recursive = 0;
+  __syscalls.getreent = 0;
+  __syscalls.clock_gettime = 0;
+  __syscalls.clock_settime = 0;
+  __syscalls.clock_getres = 0;
+  __syscalls.nanosleep = 0;
 
 }
 
@@ -166,5 +189,19 @@ char orcus_uart_getc(bool isBlocking) {
     return REG8(RHB0);
   } else {
     return FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0 ? -1 : REG8(RHB0);
+  }
+}
+
+void orcus_uart_printf(const char* format, ...) {
+  const int bufferSize = 256;
+  char buffer[bufferSize];
+  va_list args;
+  va_start(args, format);
+  vsprintf(buffer, format, args);
+  va_end (args);
+
+  for(int i = 0 ; i < bufferSize ; i++) {
+    if(buffer[i] == '\0') return;
+    else orcus_uart_putc(buffer[i], true);
   }
 }

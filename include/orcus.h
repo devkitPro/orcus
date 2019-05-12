@@ -20,6 +20,7 @@ typedef enum { NONE, ODD, EVEN } Parity;
 extern void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, int stopBits);
 extern char orcus_uart_putc(char c, bool isBlocking);
 extern char orcus_uart_getc(bool isBlocking);
+extern void orcus_uart_printf(const char* format, ...);
 
 // orcus settings
 typedef struct {
