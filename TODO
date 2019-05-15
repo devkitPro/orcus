@@ -2,9 +2,10 @@
 | TODO |
 +------+
 
-crt0:
-	* Blank bss section
-
 Orcus:
-	* Init function to set up memory timings and default 200MHz CPU clock - uboot/mmsp2dk.c
-	* Set up UART
+	* GPIO functions
+	* LCD functions
+	* Audio
+	* SD card
+	* NAND
+	* ARM940T

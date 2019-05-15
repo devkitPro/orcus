@@ -28,6 +28,10 @@ extern r32 _fiq;
 #define REGISTER(name, offset, size) volatile r##size name = (r##size) (0xC0000000+offset)
 
 // clock registers
+#define SYSCSETREG 0x091C
+#define SYSCSETREG_920(x) (x<<0)
+#define SYSCSETREG_940(x) (x<<3)
+
 #define F_MDIV 0x49
 #define F_PDIV 0x1
 #define F_SDIV 0x0
@@ -44,8 +48,16 @@ extern r32 _fiq;
 #define NO_CLK 0x0
 
 #define FPLLSETVREG 0x0910
+#define FPLLVSETREG 0x0912
 #define UPLLSETVREG 0x0914
+#define UPLLVSETREG 0x0916
 #define APLLSETVREG 0x0918
+#define APLLVSETREG 0x091A
+  
+#define CLKCHGSTREG 0x0902
+#define CLKCHGSTREG_FPLLCHGST BIT(0)
+#define CLKCHGSTREG_UPLLCHGST BIT(1)
+#define CLKCHGSTREG_APLLCHGST BIT(1)
 
 #define CLKMGRREG 0x0C12
 #define CLKMGRREG_APLL_USE BIT(1)
@@ -150,6 +162,10 @@ extern r32 _fiq;
 #define FCONx_RX_FIFO_RESET BIT(1)
 #define FCONx_FIFO_EN BIT(0)
 
+#define MCON0 0x1206
+
+#define BRD0 0x1214
+
 #define ESTATUS0 0x120A
 #define ESTATUS1 0x122A
 #define ESTATUS2 0x124A
@@ -179,5 +195,9 @@ extern r32 _fiq;
 #define RHB1 0x1232
 #define RHB2 0x1252
 #define RHB3 0x1272
+
+// GPIO
+#define GPIODALTFNLOW 0x1026
+#define GPIODALTFNHI 0x1046
   
 #endif
