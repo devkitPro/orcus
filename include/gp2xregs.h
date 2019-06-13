@@ -197,7 +197,51 @@ extern r32 _fiq;
 #define RHB3 0x1272
 
 // GPIO
+#define GPIOAALTFNLOW 0x1020
+#define GPIOAALTFNHI 0x1040
+#define GPIOBALTFNLOW 0x1022
+#define GPIOBALTFNHI 0x1042
 #define GPIODALTFNLOW 0x1026
 #define GPIODALTFNHI 0x1046
+#define GPIOHALTFNLOW 0x102E
+#define GPIOHALTFNHI 0x104E
+#define GPIOLALTFNLOW 0x1036
+#define GPIOLALTFNHI 0x1056
+
+#define GPIOAOUT 0x1060
+#define GPIOBOUT 0x1062
+#define GPIOCOUT 0x1064
+#define GPIODOUT 0x1066
+#define GPIOEOUT 0x1068
+#define GPIOFOUT 0x106A
+#define GPIOGOUT 0x106C
+#define GPIOHOUT 0x106E
+#define GPIOIOUT 0x1070
+#define GPIOJOUT 0x1072
+#define GPIOKOUT 0x1074
+#define GPIOLOUT 0x1076
+#define GPIOMOUT 0x1078
+#define GPIONOUT 0x107A
+#define GPIOOOUT 0x107C
   
+#define GPIOBPUENB 0x10C2
+#define GPIOLPUENB 0x10D6
+
+#define IN 0x0
+#define OUT 0x1
+#define ALTFN1 0x2
+#define ALTFN2 0x3
+
+/* GPIOs used by program code */
+
+// GPIOB
+#define CX25874_SLEEP BIT(2) // sleep = 1, awake = 0
+#define LCD_RESET BIT(3)
+
+// GPIOH
+#define LCD_VGH BIT(1)
+#define BACKLIGHT_F100 BIT(2)
+#define BATTERY_LED BIT(4) 
+#define BACKLIGHT_F200 BIT(11)
+
 #endif

@@ -8,4 +8,4 @@ Orcus:
 	* Audio
 	* SD card
 	* NAND
-	* ARM940T
+	* ARM940T - this will require implementing the locks in __syscalls, to prevent mallocing the same thing (and also so you can actually use mutexes etc. if newlib provides them!). probably a shared heap ptr too? Will need to translate between the two

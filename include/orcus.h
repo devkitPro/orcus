@@ -10,6 +10,7 @@ extern uint32_t __heap_end;
 
 // orcus system functions
 extern void orcus_init();
+extern void orcus_init_syscalls();
 extern void orcus_configure_peripherals();
 extern int orcus_calculate_uart_diviser(int baudRate);
 extern void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD);
@@ -21,6 +22,13 @@ extern void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, 
 extern char orcus_uart_putc(char c, bool isBlocking);
 extern char orcus_uart_getc(bool isBlocking);
 extern void orcus_uart_printf(const char* format, ...);
+
+extern void orcus_configure_gpio();
+
+/**
+ * Delay for <loops> ticks. A tick is of arbitrary length.
+ */
+extern void orcus_delay(int loops);
 
 // orcus settings
 typedef struct {

@@ -3,6 +3,7 @@
 #include <orcus.h>
 #include <reent.h>
 #include <sys/lock.h>
+#include <sys/time.h>
 #include <sys/iosupport.h>
 
 #undef errno
@@ -18,4 +19,13 @@ void *_sbrk_r(struct _reent *ptr, ptrdiff_t incr) {
     ptr->_errno = ENOMEM;
     return  (void *) -1;
   }
+}
+
+int orcus_nanosleep(const struct timespec *req, struct timespec *rem) {
+  // TODO - need interrupts enabled to use the timer
+  return 0;
+}
+
+void orcus_init_syscalls() {
+  __syscalls.nanosleep = &orcus_nanosleep;
 }

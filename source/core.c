@@ -12,6 +12,59 @@ extern uint32_t __int_stack_size;
 extern uint32_t __usr_stack_size;
 uint32_t __heap_end;
 
+void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t statusBit) {
+  REG16(setVReg) = value;
+  while(REG16(CLKCHGSTREG)&statusBit);
+  for(int i = 0; (i<10000000) && (REG16(readVReg) != value) ; i++);
+}
+
+void orcus_init() {
+  // set up clock sources - default settings when system boots, set here in case something
+  // else has messed around with them
+  setClock(((F_MDIV << 8) | (F_PDIV << 2) | F_SDIV), FPLLSETVREG, FPLLVSETREG, CLKCHGSTREG_FPLLCHGST);
+  setClock(((U_MDIV << 8) | (U_PDIV << 2) | U_SDIV), UPLLSETVREG, UPLLVSETREG, CLKCHGSTREG_UPLLCHGST);
+  setClock(((A_MDIV << 8) | (A_PDIV << 2) | A_SDIV), APLLSETVREG, APLLVSETREG, CLKCHGSTREG_APLLCHGST);
+  REG16(CLKMGRREG) = CLKMGRREG_APLL_USE | CLKMGRREG_UPLL_USE;
+
+  // configure syscalls
+  orcus_init_syscalls();
+
+  // disable clocks for unwanted peripherals
+  orcus_configure_peripherals();
+
+  // set up UART0 to 115200/8N1
+  orcus_configure_uart(115200, 8, NONE, 1);
+
+  // set up memory timings
+  orcus_default_ram_timings();
+
+  orcus_configure_gpio();
+  // TODO gpio
+  // TODO lcd
+
+  // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
+
+  // establish memory map - TODO - this formula isn't correct for some reason, we should be getting 0x3FFDF00
+  __heap_end = __stack_base - __int_stack_size - __int_stack_size - __usr_stack_size;
+    orcus_uart_printf("heapend: 0x%08x\r\n", __heap_end);
+
+  extern void* heap_ptr;
+  heap_ptr = (void*)&__heap_start;
+}
+
+void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD) {
+  REG16(MEMTIMEX0) = ((tMRD & 0xF) << 12) | ((tRFC & 0xF) << 8) | ((tRP & 0xF) << 4) | (tRCD & 0xF);
+  REG16(MEMTIMEX1) = ((tRC & 0xF) << 8) | ((tRAS & 0xF) << 4) | (tWR & 0xF);  
+}
+
+void orcus_default_ram_timings() { orcus_set_ram_timings(7, 15, 2, 7, 7, 7, 7); }
+void orcus_fast_ram_timings() { orcus_set_ram_timings(5, 3, 0, 0, 0, 1, 1); }
+
+void orcus_delay(int loops) {
+  volatile int i = loops;
+  for(;i != 0;i--);
+}
+
 _mmsp2_peripheral_clock_enable mmsp2PeripheralClockEnable = {
 							     .externalSystemClock = false,
 							     .adc = true,
@@ -55,59 +108,6 @@ _mmsp2_peripheral_clock_enable mmsp2PeripheralClockEnable = {
 							     .i2s = false,
 							     .ac97 = true };
 
-void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t statusBit) {
-  REG16(setVReg) = value;
-  while(REG16(CLKCHGSTREG)&statusBit);
-  for(int i = 0; (i<10000000) && (REG16(readVReg) != value) ; i++);
-}
-
-static inline void delay (unsigned long loops)
-{
-        __asm__ volatile ("1:\n"
-          "subs %0, %1, #1\n"
-          "bne 1b":"=r" (loops):"0" (loops));
-}
-
-
-void orcus_init() {
-  // set up clock sources - default settings when system boots, set here in case something
-  // else has messed around with them
-  setClock(((F_MDIV << 8) | (F_PDIV << 2) | F_SDIV), FPLLSETVREG, FPLLVSETREG, CLKCHGSTREG_FPLLCHGST);
-  setClock(((U_MDIV << 8) | (U_PDIV << 2) | U_SDIV), UPLLSETVREG, UPLLVSETREG, CLKCHGSTREG_UPLLCHGST);
-  setClock(((A_MDIV << 8) | (A_PDIV << 2) | A_SDIV), APLLSETVREG, APLLVSETREG, CLKCHGSTREG_APLLCHGST);
-  REG16(CLKMGRREG) = CLKMGRREG_APLL_USE | CLKMGRREG_UPLL_USE;
-
-  // disable clocks for unwanted peripherals
-  orcus_configure_peripherals();
-
-  // set up UART0 to 115200/8N1
-  orcus_configure_uart(115200, 8, NONE, 1);
-
-  // set up memory timings
-  orcus_default_ram_timings();
-
-  // TODO gpio
-  // TODO lcd
-
-  // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
-
-  // establish memory map - TODO - this formula isn't correct for some reason, we should be getting 0x3FFDF00
-  __heap_end = __stack_base - __int_stack_size - __int_stack_size - __usr_stack_size;
-    orcus_uart_printf("heapend: 0x%08x\r\n", __heap_end);
-
-  extern void* heap_ptr;
-  heap_ptr = (void*)&__heap_start;
-}
-
-int orcus_calculate_uart_baud(int baudRate) {
-    return ((14745600/(baudRate*16))-1);
-}
-
-int orcus_calculate_uart_diviser(int baudRate) {
-    const int clkBasis = 18432000;
-    return (int) (clkBasis / (baudRate * 16)) - 1;
-}
-
 void orcus_configure_peripherals() {
   REG16(SYSCLKENREG) = SET(REG16(SYSCLKENREG), SYSCLKENREG_ESYSCLK, mmsp2PeripheralClockEnable.externalSystemClock);
   REG16(SYSCLKENREG) = SET(REG16(SYSCLKENREG), SYSCLKENREG_ADCCLK, mmsp2PeripheralClockEnable.adc);
@@ -150,58 +150,4 @@ void orcus_configure_peripherals() {
   REG16(ASCLKENREG) = SET(REG16(ASCLKENREG), ASCLKENREG_SPDIFICLK, mmsp2PeripheralClockEnable.spdifIn);
   REG16(ASCLKENREG) = SET(REG16(ASCLKENREG), ASCLKENREG_I2SCLK, mmsp2PeripheralClockEnable.i2s);
   REG16(ASCLKENREG) = SET(REG16(ASCLKENREG), ASCLKENREG_AC97CLK, mmsp2PeripheralClockEnable.ac97);
-}
-
-void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD) {
-  REG16(MEMTIMEX0) = ((tMRD & 0xF) << 12) | ((tRFC & 0xF) << 8) | ((tRP & 0xF) << 4) | (tRCD & 0xF);
-  REG16(MEMTIMEX1) = ((tRC & 0xF) << 8) | ((tRAS & 0xF) << 4) | (tWR & 0xF);  
-}
-
-void orcus_default_ram_timings() { orcus_set_ram_timings(7, 15, 2, 7, 7, 7, 7); }
-void orcus_fast_ram_timings() { orcus_set_ram_timings(5, 3, 0, 0, 0, 1, 1); }
-
-void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, int stopBits) {
-  REG16(URT0CSETREG) = URT0CSETREG_UART0(URTnCSETREG_CLKSRC(APLL_CLK) | URTnCSETREG_CLKDIV(orcus_calculate_uart_diviser(baudRate)));
-  REG16(LCON0) = LCONx_SIR_MODE(LCONx_SIR_MODE_NORMAL)
-    | LCONx_PARITY(parity == ODD ? LCONx_PARITY_ODD :
-		   parity == EVEN ? LCONx_PARITY_EVEN : LCONx_PARITY_NONE)
-    | LCONx_STOPBIT(stopBits == 2 ? LCONx_STOPBIT_TWO : LCONx_STOPBIT_ONE)
-    | LCONx_WORD_LEN(stopBits == 5 ? LCONx_WORD_LEN_5BITS :
-		     stopBits == 6 ? LCONx_WORD_LEN_6BITS :
-		     stopBits == 7 ? LCONx_WORD_LEN_7BITS : LCONx_WORD_LEN_8BITS);
-  REG16(UCON0) = UCONx_TRANS_MODE(UCONx_MODE_INTPOLL) | UCONx_RECEIVE_MODE(UCONx_MODE_INTPOLL);
-  REG16(FCON0) = FCONx_FIFO_EN | FCONx_TX_FIFO_RESET | FCONx_RX_FIFO_RESET;
-  REG16(BRD0) = orcus_calculate_uart_baud(baudRate);
-}
-
-char orcus_uart_putc(char c, bool isBlocking) {
-  if(isBlocking) {
-    while(REG16(FSTATUS0)&FSTATUSx_TX_FIFO_FULL);
-    return REG8(THB0) = c;
-  } else {
-    return REG16(FSTATUS0)&FSTATUSx_TX_FIFO_FULL ? -1 : (REG8(THB0) = c);
-  }
-}
-
-char orcus_uart_getc(bool isBlocking) {
-  if(isBlocking) {
-    while(FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0);
-    return REG8(RHB0);
-  } else {
-    return FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0 ? -1 : REG8(RHB0);
-  }
-}
-
-void orcus_uart_printf(const char* format, ...) {
-  const int bufferSize = 256;
-  char buffer[bufferSize];
-  va_list args;
-  va_start(args, format);
-  vsprintf(buffer, format, args);
-  va_end (args);
-
-  for(int i = 0 ; i < bufferSize ; i++) {
-    if(buffer[i] == '\0') return;
-    else orcus_uart_putc(buffer[i], true);
-  }
 }
