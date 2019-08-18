@@ -337,4 +337,14 @@ extern r32 _fiq;
 #define DPC_FPIATV2 0x280C
 #define DPC_FPIATV3 0x280E
 
+#define MLC_STL_CNTL 0x28DA
+#define MLC_STL_BPP(x) (x << 9)
+
+#define MLC_STL_MIXMUX 0x28DC
+#define MLC_STL_ALPHAL 0x28DE
+#define MLC_STL_ALPHAH 0x28E0
+
+#define MLC_STL_CKEY_GR 0x2902
+#define MLC_STL_CKEY_B 0x2904
+
 #endif

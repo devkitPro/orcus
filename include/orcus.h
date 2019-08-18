@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef uint8_t uint4_t;
+
 // memory layout from linker and init function
 extern uint32_t __heap_start;
 extern uint32_t __heap_end;
@@ -82,5 +84,25 @@ typedef struct {
   bool ac97: 1;
 } _mmsp2_peripheral_clock_enable;
 extern _mmsp2_peripheral_clock_enable mmsp2PeripheralClockEnable;
+
+typedef enum {
+	       REGION1 = 1, REGION2 = 2, REGION3 = 3, REGION4 = 4, REGION5 = 5
+} RgbRegion;
+
+typedef enum {
+		P4BPP = 0, P8BPP = 1, RGB565 = 2, RGB888 = 3
+} RgbFormat;
+
+typedef enum {
+	      NO_BLENDING = 0, COLOUR_KEY = 1, ALPHA = 2
+} BlendingMode;
+
+extern void orcus_configure_display();
+extern void orcus_set_rgb_format(RgbFormat format);
+extern void orcus_rgb_toggle_region(RgbRegion region, bool onOff);
+extern void orcus_rgb_region_alpha(RgbRegion region, uint4_t alpha);
+extern void orcus_rgb_region_colourkey(RgbRegion region);
+extern void orcus_rgb_set_colourkey(uint8_t r, uint8_t g, uint8_t b);
+extern void orcus_rgb_region_noblend(RgbRegion region);
 
 #endif
