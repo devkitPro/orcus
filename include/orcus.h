@@ -104,5 +104,7 @@ extern void orcus_rgb_region_alpha(RgbRegion region, uint4_t alpha);
 extern void orcus_rgb_region_colourkey(RgbRegion region);
 extern void orcus_rgb_set_colourkey(uint8_t r, uint8_t g, uint8_t b);
 extern void orcus_rgb_region_noblend(RgbRegion region);
+extern void orcus_rgb_scale(int srcW, int srcH);
+extern void orcus_set_rgb_address(void* fb);
 
 #endif

@@ -347,4 +347,14 @@ extern r32 _fiq;
 #define MLC_STL_CKEY_GR 0x2902
 #define MLC_STL_CKEY_B 0x2904
 
+#define MLC_STL_HSC 0x2906
+#define MLC_STL_VSCL 0x2908
+#define MLC_STL_VSCH 0x290A
+#define MLC_STL_HW 0x290C
+
+#define MLC_STL_OADRL 0x290E
+#define MLC_STL_OADRH 0x2910
+#define MLC_STL_EADRL 0x2912
+#define MLC_STL_EADRH 0x2914
+  
 #endif

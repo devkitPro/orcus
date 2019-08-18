@@ -27,10 +27,16 @@ void orcus_configure_display() {
   REG16(DPC_CNTL) |= ENB(1);
 }
 
+static RgbFormat rgbFormat; 
+
 // page 344 of datasheet for MLC information
 void orcus_set_rgb_format(RgbFormat format) {
+  rgbFormat = format;
   REG16(MLC_STL_CNTL) &= ~MLC_STL_BPP(3);
   REG16(MLC_STL_CNTL) |= MLC_STL_BPP(format);
+
+  // have to set the scale registers here since they are dependend on pixel format
+  orcus_rgb_scale(320, 240);
 }
 
 void orcus_rgb_toggle_region(RgbRegion region, bool onOff) {
@@ -78,11 +84,37 @@ void orcus_rgb_set_colourkey(uint8_t r, uint8_t g, uint8_t b) {
   REG16(MLC_STL_CKEY_B) = b;
 }
 
+// setting srcW or srcH to 0 disables scaling for that axis
+void orcus_rgb_scale(int srcW, int srcH) {
+  uint16_t horizontalPixelWidth =
+    rgbFormat == P4BPP ? srcW / 2
+  : rgbFormat == P8BPP ? srcW
+  : rgbFormat == RGB565 ? srcW * 2
+  : srcW * 3; // RGB888
+  
+  uint16_t hScale = srcW == 0 ? 0 : (srcW*1024)/320;
+  uint32_t vScale = srcH == 0 ? 0 : (srcH*horizontalPixelWidth)/240;
+
+  REG16(MLC_STL_HSC) = hScale & 0xFFFF;
+  REG16(MLC_STL_VSCL) = vScale & 0xFFFF;
+  REG16(MLC_STL_VSCH) = vScale >> 16;  
+
+  REG16(MLC_STL_HW) = horizontalPixelWidth;
+}
+
+void orcus_set_rgb_address(void* fb) {
+  uint32_t addr = (uint32_t) fb;
+  REG16(MLC_STL_OADRL) = addr & 0xFFFF;
+  REG16(MLC_STL_OADRH) = addr >> 16;
+  REG16(MLC_STL_EADRL) = addr & 0xFFFF;
+  REG16(MLC_STL_EADRH) = addr >> 16;
+}
+
 
   /*     
-        MLC_RGB_SetScale(LCD_WIDTH, LCD_HEIGHT, LCD_WIDTH*2, LCD_WIDTH, LCD_HEIGHT);
+
+
         MLC_RGB_SetCoord(MLC_RGB_RGN_1, PLANE_X_OFFSET, PLANE_X_OFFSET+PLANE_X_WIDTH, PLANE_Y_OFFSET, PLANE_Y_OFFSET+PLANE_Y_HEIGHT);
-        MLC_RGB_SetAddress((unsigned long)PA_FB0_BASE, (unsigned long)PA_FB0_BASE);
         MLC_RGBOn(MLC_RGB_RGN_1);
         
 
