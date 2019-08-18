@@ -223,7 +223,23 @@ extern r32 _fiq;
 #define GPIOMOUT 0x1078
 #define GPIONOUT 0x107A
 #define GPIOOOUT 0x107C
-  
+
+#define GPIOAPINLVL 0x1180
+#define GPIOBPINLVL 0x1182
+#define GPIOCPINLVL 0x1184
+#define GPIODPINLVL 0x1186
+#define GPIOEPINLVL 0x1188
+#define GPIOFPINLVL 0x118A
+#define GPIOGPINLVL 0x118C
+#define GPIOHPINLVL 0x118E
+#define GPIOJPINLVL 0x1192
+#define GPIOKPINLVL 0x1194
+#define GPIOLPINLVL 0x1196
+#define GPIOMPINLVL 0x1198
+#define GPIOIPINLVL 0x1190
+#define GPIONPINLVL 0x119A
+#define GPIOOPINLVL 0x119C
+
 #define GPIOBPUENB 0x10C2
 #define GPIOLPUENB 0x10D6
 
@@ -238,10 +254,87 @@ extern r32 _fiq;
 #define CX25874_SLEEP BIT(2) // sleep = 1, awake = 0
 #define LCD_RESET BIT(3)
 
+// GPIOC
+#define BTN_START BIT(8)
+#define BTN_SELECT BIT(9)
+#define BTN_SHOULDER_LEFT BIT(10)
+#define BTN_SHOULDER_RIGHT BIT(11)
+#define BTN_A BIT(12)
+#define BTN_B BIT(13)
+#define BTN_X BIT(14)
+#define BTN_Y BIT(15)
+
+// GPIOD
+#define BTN_VOL_DOWN BIT(6)
+#define BTN_VOL_UP BIT(7)
+#define BTN_STICK_PRESS BIT(11)
+
 // GPIOH
 #define LCD_VGH BIT(1)
 #define BACKLIGHT_F100 BIT(2)
 #define BATTERY_LED BIT(4) 
 #define BACKLIGHT_F200 BIT(11)
+
+// GPIOM
+#define STK_UP BIT(0)
+#define STK_UP_LEFT BIT(1)
+#define STK_LEFT BIT(2)
+#define STK_DOWN_LEFT BIT(3)
+#define STK_DOWN BIT(4)
+#define STK_DOWN_RIGHT BIT(5)
+#define STK_RIGHT BIT(6)
+#define STK_UP_RIGHT BIT(7)
+
+// display registers
+#define DISPCSETREG 0x0924
+#define DISPCLKSRC(x) (x << 14)
+#define DISPCLKDIV(x) (x << 8)
+#define DISPCLKPOL(x) (x << 7)
+
+#define DPC_CNTL 0x2800
+#define PAL(x) (x << 12)
+#define CISCYNC(x) (x << 11)
+#define HDTV(x) (x << 10)
+#define ENC(x) (x << 9)
+#define TVMODE(x) (x << 8)
+#define DOT(x) (x << 6)
+#define INTERLACE(x) (x << 5)
+#define SYNCCBCR(x) (x << 4)
+#define ESAVEN(x) (x << 3)
+#define DOF(x) (x << 1)
+#define ENB(x) (x << 0)
+
+#define DPC_CLKCNTL 0x2848
+#define CLKSRC(x) (x << 3)
+#define CLK2SEL(x) (x << 2)
+#define CLK1SEL(x) (x << 1)
+#define CLK1POL(x) (x << 0)
+
+#define DPC_X_MAX 0x2816
+#define DPC_Y_MAX 0x2818
+
+#define DPC_HS_WIDTH 0x281A
+#define HSPADCFG(x) (x << 8)
+#define HSWID(x) (x << 0)
+
+#define DPC_HS_STR 0x281C
+#define DPC_HS_END 0x281E
+
+#define DPC_DE 0x2826
+#define DEPADCFG(x) (x << 14)
+#define DESTR(x) (x << 4)
+#define DEWID(x) (x << 0)
+
+#define DPC_FPIPOL1 0x2804
+#define DPC_FPIPOL2 0x2806
+#define DPC_FPIPOL3 0x2808
+#define HSPOL(x) (x << 1)
+
+#define DPC_V_SYNC 0x2820
+#define DPC_V_END 0x2822
+
+#define DPC_FPIATV1 0x280A
+#define DPC_FPIATV2 0x280C
+#define DPC_FPIATV3 0x280E
 
 #endif
