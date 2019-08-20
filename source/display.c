@@ -33,7 +33,7 @@ static RgbFormat rgbFormat;
 void rgbSetPixelFormat(RgbFormat format) {
   rgbFormat = format;
   REG16(MLC_STL_CNTL) &= ~MLC_STL_BPP(3);
-  REG16(MLC_STL_CNTL) |= MLC_STL_BPP(format); //0x400
+  REG16(MLC_STL_CNTL) |= MLC_STL_BPP(format);
 
   // have to set the scale registers here since they are dependend on pixel format
   rgbSetScale(320, 240);
@@ -122,13 +122,3 @@ void rgbSetRegionPosition(RgbRegion region, int x, int y, int width, int height)
     REG16(baseAddr+6) = y + height - 1;
   }
 }
-
-
-  /*     
-
-
-        MLC_RGBOn(MLC_RGB_RGN_1);
-        // TODO palette registers MLC_STL_PALLT_A, MLC_STL_PALLT_D
-	// could have an array write to take advantage of the address auto increment, and also a specific number read/write. Looks like 2 bytes per colour, rgb888
-
-  */

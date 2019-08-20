@@ -197,16 +197,14 @@ extern r32 _fiq;
 #define RHB3 0x1272
 
 // GPIO
-#define GPIOAALTFNLOW 0x1020 // mine 0xaaaa, 0xaaaa
-#define GPIOAALTFNHI 0x1040 // mine 0xaaaa, 0xaaaa
-#define GPIOBALTFNLOW 0x1022 // mine 0x0, theirs aa50
-#define GPIOBALTFNHI 0x1042 // , aaaa
-//#define GPIODALTFNLOW 0x1026 // 000a, theirs 29aa
-//#define GPIODALTFNHI 0x1046 // 0000 , 00aa
-#define GPIOHALTFNLOW 0x102E // 0057, 0055
-#define GPIOHALTFNHI 0x104E // 0002 , 0002
-#define GPIOLALTFNLOW 0x1036 // , 2aaa
-#define GPIOLALTFNHI 0x1056 // , 0055
+#define GPIOAALTFNLOW 0x1020
+#define GPIOAALTFNHI 0x1040
+#define GPIOBALTFNLOW 0x1022
+#define GPIOBALTFNHI 0x1042
+#define GPIOHALTFNLOW 0x102E
+#define GPIOHALTFNHI 0x104E
+#define GPIOLALTFNLOW 0x1036
+#define GPIOLALTFNHI 0x1056
 
 #define GPIOAOUT 0x1060
 #define GPIOBOUT 0x1062
@@ -215,7 +213,7 @@ extern r32 _fiq;
 #define GPIOEOUT 0x1068
 #define GPIOFOUT 0x106A
 #define GPIOGOUT 0x106C
-#define GPIOHOUT 0x106E // 001e
+#define GPIOHOUT 0x106E
 #define GPIOIOUT 0x1070
 #define GPIOJOUT 0x1072
 #define GPIOKOUT 0x1074
@@ -240,8 +238,8 @@ extern r32 _fiq;
 #define GPIONPINLVL 0x119A
 #define GPIOOPINLVL 0x119C
 
-#define GPIOBPUENB 0x10C2 //, ff0f
-#define GPIOLPUENB 0x10D6 // 7fff
+#define GPIOBPUENB 0x10C2
+#define GPIOLPUENB 0x10D6
 
 #define IN 0x0
 #define OUT 0x1
@@ -337,28 +335,28 @@ extern r32 _fiq;
 #define DPC_FPIATV2 0x280C
 #define DPC_FPIATV3 0x280E
 
-#define MLC_STL_CNTL 0x28DA // 04ab
+#define MLC_STL_CNTL 0x28DA
 #define MLC_STL_BPP(x) (x << 9)
 
-#define MLC_STL_MIXMUX 0x28DC // 0000
-#define MLC_STL_ALPHAL 0x28DE // 0008
-#define MLC_STL_ALPHAH 0x28E0 // 0000
+#define MLC_STL_MIXMUX 0x28DC
+#define MLC_STL_ALPHAL 0x28DE
+#define MLC_STL_ALPHAH 0x28E0
 
-#define MLC_STL_CKEY_GR 0x2902 // ffff
-#define MLC_STL_CKEY_B 0x2904 // 00ff
+#define MLC_STL_CKEY_GR 0x2902
+#define MLC_STL_CKEY_B 0x2904
 
-#define MLC_STL_HSC 0x2906 // 0400
-#define MLC_STL_VSCL 0x2908 // 0280
-#define MLC_STL_VSCH 0x290A // 0280
-#define MLC_STL_HW 0x290C // 0280
+#define MLC_STL_HSC 0x2906
+#define MLC_STL_VSCL 0x2908
+#define MLC_STL_VSCH 0x290A
+#define MLC_STL_HW 0x290C
 
-#define MLC_STL_OADRL 0x290E // 0000
-#define MLC_STL_OADRH 0x2910 // 3100
-#define MLC_STL_EADRL 0x2912 // 0000
-#define MLC_STL_EADRH 0x2914 // 3100
+#define MLC_STL_OADRL 0x290E
+#define MLC_STL_OADRH 0x2910
+#define MLC_STL_EADRL 0x2912
+#define MLC_STL_EADRH 0x2914
 
-#define MLC_STLn_STX 0x28E2 // 0000/013f/0000/00ef
+#define MLC_STLn_STX 0x28E2
 
-#define MLC_OVLAY_CNTR 0x2880 // 1004
+#define MLC_OVLAY_CNTR 0x2880
 
 #endif
