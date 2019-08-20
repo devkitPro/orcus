@@ -98,13 +98,14 @@ typedef enum {
 } BlendingMode;
 
 extern void orcus_configure_display();
-extern void orcus_set_rgb_format(RgbFormat format);
-extern void orcus_rgb_toggle_region(RgbRegion region, bool onOff);
-extern void orcus_rgb_region_alpha(RgbRegion region, uint4_t alpha);
-extern void orcus_rgb_region_colourkey(RgbRegion region);
-extern void orcus_rgb_set_colourkey(uint8_t r, uint8_t g, uint8_t b);
-extern void orcus_rgb_region_noblend(RgbRegion region);
-extern void orcus_rgb_scale(int srcW, int srcH);
-extern void orcus_set_rgb_address(void* fb);
+extern void rgbSetPixelFormat(RgbFormat format);
+extern void rgbToggleRegion(RgbRegion region, bool onOff);
+extern void rgbRegionBlendAlpha(RgbRegion region, uint4_t alpha);
+extern void rgbRegionBlendColourKey(RgbRegion region);
+extern void rgbColourKey(uint8_t r, uint8_t g, uint8_t b);
+extern void rgbRegionNoBlend(RgbRegion region);
+extern void rgbSetScale(int srcW, int srcH);
+extern void rgbSetFbAddress(void* fb);
+extern void rgbSetRegionPosition(RgbRegion region, int x, int y, int width, int height);
 
 #endif

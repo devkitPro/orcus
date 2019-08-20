@@ -38,7 +38,8 @@ void orcus_init() {
   // set up memory timings
   orcus_default_ram_timings();
 
-  orcus_configure_gpio();
+    orcus_configure_gpio();
+    orcus_configure_display();
   // TODO gpio
   // TODO lcd
 

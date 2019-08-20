@@ -13,6 +13,7 @@ void orcus_configure_gpio() {
     | (ALTFN1 << 4)
     | (ALTFN1<< 2)
     | (ALTFN1<< 0);
+  REG16(GPIOBALTFNLOW) = 0xAA50;
   REG16(GPIOAALTFNLOW) = (ALTFN1 << 14)
     | (ALTFN1 << 12)
     | (ALTFN1 << 10)
@@ -54,6 +55,6 @@ void orcus_configure_gpio() {
   REG16(GPIOHOUT) = REG16(GPIOHOUT) | LCD_VGH;
   orcus_delay(10);
 
-  REG16(GPIOHOUT) |= LCD_RESET;
+  REG16(GPIOBOUT) |= LCD_RESET;
   REG16(GPIOHOUT) |= BACKLIGHT_F100;
 }
