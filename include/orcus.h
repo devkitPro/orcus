@@ -11,19 +11,17 @@ extern uint32_t __heap_start;
 extern uint32_t __heap_end;
 
 // orcus system functions
-extern void orcus_init();
-extern void orcus_init_syscalls();
-extern void orcus_configure_peripherals();
+extern void gp2xInit();
 extern int orcus_calculate_uart_diviser(int baudRate);
 extern void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD);
 extern void orcus_default_ram_timings();
 extern void orcus_fast_ram_timings();
 
 typedef enum { NONE, ODD, EVEN } Parity;
-extern void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, int stopBits);
-extern char orcus_uart_putc(char c, bool isBlocking);
-extern char orcus_uart_getc(bool isBlocking);
-extern void orcus_uart_printf(const char* format, ...);
+extern void uartConfigure(int baudRate, int bitsPerFrame, Parity parity, int stopBits);
+extern char uart_putc(char c, bool isBlocking);
+extern char uart_getc(bool isBlocking);
+extern void uart_printf(const char* format, ...);
 
 extern void orcus_configure_gpio();
 
@@ -97,7 +95,26 @@ typedef enum {
 	      NO_BLENDING = 0, COLOUR_KEY = 1, ALPHA = 2
 } BlendingMode;
 
-extern void orcus_configure_display();
+#define A (1<<0)
+#define B (1<<1)
+#define X (1<<2)
+#define Y (1<<3)
+#define START (1<<4)
+#define SELECT (1<<5)
+#define UP (1<<6)
+#define DOWN (1<<7)
+#define LEFT (1<<8)
+#define RIGHT (1<<9)
+#define UP_LEFT (1<<10)
+#define UP_RIGHT (1<<11)
+#define DOWN_LEFT (1<<12)
+#define DOWN_RIGHT (1<<13)
+#define VOL_UP (1<<14)
+#define VOL_DOWN (1<<15)
+#define STICK (1<<16)
+#define L (1<<17)
+#define R (1<<18)
+
 extern void rgbSetPixelFormat(RgbFormat format);
 extern void rgbToggleRegion(RgbRegion region, bool onOff);
 extern void rgbRegionBlendAlpha(RgbRegion region, uint4_t alpha);
@@ -107,5 +124,7 @@ extern void rgbRegionNoBlend(RgbRegion region);
 extern void rgbSetScale(int srcW, int srcH);
 extern void rgbSetFbAddress(void* fb);
 extern void rgbSetRegionPosition(RgbRegion region, int x, int y, int width, int height);
+
+extern uint32_t btnState();
 
 #endif

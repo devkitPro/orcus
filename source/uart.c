@@ -12,7 +12,7 @@ int orcus_calculate_uart_diviser(int baudRate) {
     return (int) (clkBasis / (baudRate * 16)) - 1;
 }
 
-void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, int stopBits) {
+void uartConfigure(int baudRate, int bitsPerFrame, Parity parity, int stopBits) {
   REG16(URT0CSETREG) = URT0CSETREG_UART0(URTnCSETREG_CLKSRC(APLL_CLK) | URTnCSETREG_CLKDIV(orcus_calculate_uart_diviser(baudRate)));
   REG16(LCON0) = LCONx_SIR_MODE(LCONx_SIR_MODE_NORMAL)
     | LCONx_PARITY(parity == ODD ? LCONx_PARITY_ODD :
@@ -26,7 +26,7 @@ void orcus_configure_uart(int baudRate, int bitsPerFrame, Parity parity, int sto
   REG16(BRD0) = orcus_calculate_uart_baud(baudRate);
 }
 
-char orcus_uart_putc(char c, bool isBlocking) {
+char uart_putc(char c, bool isBlocking) {
   if(isBlocking) {
     while(REG16(FSTATUS0)&FSTATUSx_TX_FIFO_FULL);
     return REG8(THB0) = c;
@@ -35,7 +35,7 @@ char orcus_uart_putc(char c, bool isBlocking) {
   }
 }
 
-char orcus_uart_getc(bool isBlocking) {
+char uart_getc(bool isBlocking) {
   if(isBlocking) {
     while(FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0);
     return REG8(RHB0);
@@ -44,7 +44,7 @@ char orcus_uart_getc(bool isBlocking) {
   }
 }
 
-void orcus_uart_printf(const char* format, ...) {
+void uart_printf(const char* format, ...) {
   const int bufferSize = 256;
   char buffer[bufferSize];
   va_list args;
@@ -54,6 +54,6 @@ void orcus_uart_printf(const char* format, ...) {
 
   for(int i = 0 ; i < bufferSize ; i++) {
     if(buffer[i] == '\0') return;
-    else orcus_uart_putc(buffer[i], true);
+    else uart_putc(buffer[i], true);
   }
 }

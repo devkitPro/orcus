@@ -5,6 +5,10 @@
 #include <gp2xregs.h>
 #include <orcus.h>
 
+extern void orcus_configure_display();
+extern void orcus_init_syscalls();
+extern void orcus_configure_peripherals();
+
 r16 IO_BASE = (r16) 0xC0000000;
 
 extern uint32_t __stack_base;
@@ -18,7 +22,7 @@ void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t stat
   for(int i = 0; (i<10000000) && (REG16(readVReg) != value) ; i++);
 }
 
-void orcus_init() {
+void gp2xInit() {
   // set up clock sources - default settings when system boots, set here in case something
   // else has messed around with them
   setClock(((F_MDIV << 8) | (F_PDIV << 2) | F_SDIV), FPLLSETVREG, FPLLVSETREG, CLKCHGSTREG_FPLLCHGST);
@@ -33,21 +37,19 @@ void orcus_init() {
   orcus_configure_peripherals();
 
   // set up UART0 to 115200/8N1
-  orcus_configure_uart(115200, 8, NONE, 1);
+  uartConfigure(115200, 8, NONE, 1);
 
   // set up memory timings
   orcus_default_ram_timings();
 
-    orcus_configure_gpio();
-    orcus_configure_display();
-  // TODO gpio
-  // TODO lcd
+  orcus_configure_gpio();
+  orcus_configure_display();
 
   // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
 
   // establish memory map - TODO - this formula isn't correct for some reason, we should be getting 0x3FFDF00
   __heap_end = __stack_base - __int_stack_size - __int_stack_size - __usr_stack_size;
-    orcus_uart_printf("heapend: 0x%08x\r\n", __heap_end);
+  uart_printf("heapend: 0x%08x\r\n", __heap_end);
 
   extern void* heap_ptr;
   heap_ptr = (void*)&__heap_start;
@@ -151,4 +153,29 @@ void orcus_configure_peripherals() {
   REG16(ASCLKENREG) = SET(REG16(ASCLKENREG), ASCLKENREG_SPDIFICLK, mmsp2PeripheralClockEnable.spdifIn);
   REG16(ASCLKENREG) = SET(REG16(ASCLKENREG), ASCLKENREG_I2SCLK, mmsp2PeripheralClockEnable.i2s);
   REG16(ASCLKENREG) = SET(REG16(ASCLKENREG), ASCLKENREG_AC97CLK, mmsp2PeripheralClockEnable.ac97);
+}
+
+uint32_t btnState() {
+  uint16_t c = ~REG16(GPIOCPINLVL);
+  uint16_t d = ~REG16(GPIODPINLVL);
+  uint16_t m = ~REG16(GPIOMPINLVL);
+  return (c & (1<<10) ? L : 0)
+    | (c & (1<<11) ? R : 0)
+    | (c & (1<<15) ? Y : 0)
+    | (c & (1<<12) ? A : 0)
+    | (c & (1<<13) ? B : 0)
+    | (c & (1<<14) ? X : 0)
+    | (c & (1<<8) ? START : 0)
+    | (c & (1<<9) ? SELECT : 0)
+    | (m & (1<<0) ? UP : 0)
+    | (m & (1<<1) ? UP_LEFT : 0)
+    | (m & (1<<2) ? LEFT : 0)
+    | (m & (1<<3) ? DOWN_LEFT : 0)
+    | (m & (1<<4) ? DOWN : 0)
+    | (m & (1<<5) ? DOWN_RIGHT : 0)
+    | (m & (1<<6) ? RIGHT : 0)
+    | (m & (1<<7) ? UP_RIGHT : 0)
+    | (d & (1<<11) ? STICK : 0)
+    | (d & (1<<6) ? VOL_DOWN : 0)
+    | (d & (1<<7) ? VOL_UP : 0);    
 }
