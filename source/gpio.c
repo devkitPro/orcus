@@ -33,12 +33,19 @@ void orcus_configure_gpio() {
 
   REG16(GPIOBPUENB) = REG16(GPIOBPUENB) & ~0xF0;
 
-  // backlight
+  // set GPIO pins for LCD
   REG16(GPIOLALTFNHI) = (IN << 6)
     | (ALTFN1 << 4)
     | (ALTFN1 << 2)
     | (ALTFN1 << 0)
     | (REG16(GPIOLALTFNHI) & 0xFF00);
+  // set GPIO L pins to SD mode
+  REG16(GPIOLALTFNLOW) = (ALTFN1 << 10)
+    | (ALTFN1 << 8)
+    | (ALTFN1 << 6)
+    | (ALTFN1 << 4)
+    | (ALTFN1 << 2)
+    | (ALTFN1 << 0)
   REG16(GPIOLPUENB) |= 0x003F;
 
 
