@@ -127,4 +127,12 @@ extern void rgbSetRegionPosition(RgbRegion region, int x, int y, int width, int 
 
 extern uint32_t btnState();
 
+typedef struct {
+  bool isInserted;
+  int sizeKb;
+  uint16_t rca;
+} SdInfo;
+
+extern void sdInit(SdInfo* info);
+
 #endif

@@ -359,4 +359,41 @@ extern r32 _fiq;
 
 #define MLC_OVLAY_CNTR 0x2880
 
+#define SDICON 0x1500
+#define SDICON_BYT_ORDER (1 << 4)
+#define SDICON_ENCLK(x) (x << 0)
+#define SDIPRE 0x1502
+#define SDICmdArgL 0x1504
+#define SDICmdArgH 0x1506
+#define SDICmdCon 0x1508
+#define SDICmdCon_HOST_RCV(x) (x << 10) // long response = 1, short = 0
+#define SDICmdCon_HOST_WAITS(x) (x << 9)
+#define SDICmdCon_CMD_OP_ST(x) (x << 8)
+#define SDICmdCon_CMD_INDEX(x) ((0x2 << 7) | x)
+
+#define SDICmdSta 0x150A
+#define SDICmdSta_RSP_CRC (1 << 12)
+#define SDICmdSta_CMD_SENT (1 << 11)
+#define SDICmdSta_CMD_TOUT (1 << 10)
+#define SDICmdSta_RSP_FIN (1 << 9)
+#define SDICmdSta_CMD_ON (1 << 8)
+
+#define SDIDatConL 0x1520
+#define SDIDatConH 0x1522
+#define SDIDatConH_WIDE_BUS(x) (x << 0)
+#define SDIDatConH_BLK_MODE(x) (x << 1)
+#define SDIDatConH_RACMD(x) (x << 3)
+
+#define SDIRSP0 0x150C
+#define SDIRSP1 0x150E
+#define SDIRSP2 0x1510
+#define SDIRSP3 0x1512
+#define SDIRSP4 0x1514
+#define SDIRSP5 0x1516
+#define SDIRSP6 0x1518
+#define SDIRSP7 0x151A
+
+#define SDIDTimerL 0x1536
+#define SDIDTimerH 0x1538
+
 #endif

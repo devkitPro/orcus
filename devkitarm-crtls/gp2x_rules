@@ -1,0 +1,10 @@
+-include $(DEVKITARM)/base_rules
+
+PORTLIBS	:=	$(PORTLIBS_PATH)/gp2x $(PORTLIBS_PATH)/armv4
+
+LIBORCUS	:=	$(DEVKITPRO)/orcus
+
+#---------------------------------------------------------------------------------
+%.elf:
+	@echo linking binary
+	@$(LD)  $(LDFLAGS) -specs=gp2x.specs $(OFILES) $(LIBPATHS) $(LIBS) -o $@

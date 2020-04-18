@@ -3,7 +3,7 @@
 
 // NOTE! Using lots of magic numbers here which were just lifted straight from an F100 via JTAG while running official GPH firmware, after trying to figure out the values based on the data sheet took too long. These may be different for an F200, to confirm
 void orcus_configure_display() {
-  REG16(DISPCSETREG) = 0x6000; // DISPCLKSRC(FPLL_CLK) | DISPCLKDIV(32) | DISPCLKPOL(0);
+  REG16(DISPCSETREG) = 0x5E00;//0x6000; // DISPCLKSRC(FPLL_CLK) | DISPCLKDIV(32) | DISPCLKPOL(0);
   REG16(DPC_CNTL) = PAL(0) | CISCYNC(0) | HDTV(0) | DOT(0) | INTERLACE(0) | SYNCCBCR(0) | ESAVEN(0) | DOF(2); //0x5
   REG16(DPC_CLKCNTL) = 0x10; //CLKSRC(2) | CLK2SEL(0) | CLK1SEL(0) | CLK1POL(0);
 

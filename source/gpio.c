@@ -45,7 +45,7 @@ void orcus_configure_gpio() {
     | (ALTFN1 << 6)
     | (ALTFN1 << 4)
     | (ALTFN1 << 2)
-    | (ALTFN1 << 0)
+    | (ALTFN1 << 0);
   REG16(GPIOLPUENB) |= 0x003F;
 
 

@@ -5,6 +5,8 @@
 int main() {
   gp2xInit();
 
+  uart_printf("\r\n\n\n**********************************\r\n* Welcome to Orcus test program  *\r\n**********************************\r\n\r\n");
+
   void* a = malloc(100);
   void* b = malloc(100);
   uart_printf("first malloc at: 0x%08x\r\n", a);
@@ -38,9 +40,17 @@ int main() {
   for(int i = 320*240 ; i-- ; )
     *(fb1+i) = 0xF800;
 
+  SdInfo* sdInfo = (SdInfo*) malloc(sizeof(SdInfo));
+  sdInit(sdInfo);
+  if(sdInfo->isInserted) {
+    uart_printf("Detected %dkb SD card\r\n", sdInfo->sizeKb);
+  } else {
+    uart_printf("No SD card detected\r\n");
+  }
+  
   while(1) {
     uint32_t btn = btnState();
-    if(btn & A) uart_printf("A pressed\r\n");
+    /*    if(btn & A) uart_printf("A pressed\r\n");
     if(btn & B) uart_printf("B pressed\r\n");
     if(btn & X) uart_printf("X pressed\r\n");
     if(btn & Y) uart_printf("Y pressed\r\n");
@@ -58,7 +68,7 @@ int main() {
     if(btn & VOL_DOWN) uart_printf("VOL_DOWN pressed\r\n");
     if(btn & STICK) uart_printf("STICK pressed\r\n");
     if(btn & L) uart_printf("L pressed\r\n");
-    if(btn & R) uart_printf("R pressed\r\n");
+    if(btn & R) uart_printf("R pressed\r\n");*/
     
     if(btn & START) rgbSetFbAddress(fb0);
     else rgbSetFbAddress(fb1);
