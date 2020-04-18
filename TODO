@@ -9,3 +9,34 @@ Orcus:
 	* SD card
 	* NAND
 	* ARM940T - this will require implementing the locks in __syscalls, to prevent mallocing the same thing (and also so you can actually use mutexes etc. if newlib provides them!). probably a shared heap ptr too? Will need to translate between the two
+
+
+Correct init sequence for SD:
+// go idle
+mwh phys 0xC000150a 0x0F00
+mwh phys 0xC0001504 0x0000
+mwh phys 0xC0001506 0x0000
+mwh phys 0xC0001508 0x0140
+mdh phys 0xc000150a
+
+// check sd version
+mwh phys 0xC000150a 0x0F00
+mwh phys 0xC0001504 0x01AA
+mwh phys 0xC0001506 0x0000
+mwh phys 0xC0001508 0x0348
+mdh phys 0xc000150a
+
+// cmd 55 - acmd41
+mwh phys 0xC000150a 0x0F00
+mwh phys 0xC0001504 0x0000
+mwh phys 0xC0001506 0x0000
+mwh phys 0xC0001508 0x0377
+mdh phys 0xc000150a
+
+mwh phys 0xC000150a 0x0F00
+mwh phys 0xC0001504 0x0000
+mwh phys 0xC0001506 0x0000
+mwh phys 0xC0001508 0x0369
+mdh phys 0xc000150a
+mdh phys 0xc000150c
+mdh phys 0xc000150e
