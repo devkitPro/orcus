@@ -43,7 +43,7 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS		:=	
+LIBS		:=	-lfat
 # TODO -lorcus
 
 
