@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <gp2xregs.h>
 #include <orcus.h>
+#include <fat.h>
+#include <sys/dir.h>
+#include <dirent.h>
+#include <unistd.h>
 
 int main() {
   gp2xInit();
@@ -45,12 +49,20 @@ int main() {
   if(sdInfo->isInserted) {
     uart_printf("Detected %dkb SD card\r\n", sdInfo->sizeKb);
 
-    uint8_t* buffer = (uint8_t*) malloc(512);
-    sdReadBlocks(0, 1, buffer);
-    uart_printf("Read one block\r\n");
-    for(int i = 0 ; i < 512 ; i++) {
-      uart_printf("0x%x\r\n", buffer[i]);
-    }
+    fatInitDefault();
+    DIR *dp;
+    struct dirent *ep;
+
+    dp = opendir ("sd:/");
+    if (dp != NULL)
+      {
+	while ((ep = readdir(dp)))
+	  uart_printf("%s\r\n", ep->d_name);
+	(void) closedir (dp);
+      }
+    else
+      uart_printf("Couldn't open the directory\r\n");
+
   } else {
     uart_printf("No SD card detected\r\n");
   }

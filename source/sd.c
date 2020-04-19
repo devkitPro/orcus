@@ -1,5 +1,7 @@
 #include <gp2xregs.h>
 #include <orcus.h>
+#include <stddef.h>
+#include "disc_io.h"
 
 #define MMC_SPEED 10000000
 #define SD_SPEED 25000000
@@ -159,28 +161,51 @@ void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
   
 }
 
-void orcus_configure_sd() {
-  //  SDICON = 0x11 (10001)
-    //    prescaler = 4 for MMC, 3 for SD, pclk is 74649600
-  // wait for 74 SD clock cycles
-  // (SDIBSize) = 512
-  // (SDIDatConH) = 0b1011
-  // when sdicmdcon says CMD_INDEX Command index with start 2bit(8bit) it means prefix 2 to the command, i.e. the upper two bits are always 0b01 - who knows why?
-  // handy website for commands http://www.chlazza.net/sdcardinfo.html
-  // sdhc takes addresses as blocks, sd as byte addresses. Should always read aligned to 512 byte block bounary
 
-  // initialization resources:
-  //http://www.rjhcoding.com/avrc-sd-interface-2.php
-  // https://yannik520.github.io/sdio.html#sec-3-6-3
-  //https://www.microchip.com/forums/m191802.aspx
-
-  // libfat... https://github.com/devkitPro/libnds/blob/master/source/arm9/dldi/sd.twl.c
-  // https://github.com/devkitPro/libfat/blob/master/source/disc.c
-
-  //          rSDICON = rSDICON | (1<<1);                     // FIFO reset
-  //       rSDIBSIZE  = 0x200;                                     // 512byte(128word)
-        /* Set timeout count */
-  ///     rSDIDTIMERL = 0xffff;
-  ///    rSDIDTIMERH = 0x001f;
-
+bool sd_Startup() {
+  uart_printf("sd_Startup invoked\r\n");
+  return true;
 }
+
+bool sd_IsInserted() {
+  uart_printf("sd_IsInserted invoked\r\n");
+  return true;
+}
+
+bool sd_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
+  sdReadBlocks(sector, numSectors, (uint8_t*) buffer);
+  return true;
+}
+
+bool sd_ClearStatus() {
+  return true;
+}
+
+bool sd_Shutdown() {
+  return true;
+}
+
+#define DEVICE_TYPE_GP2X_SD ('_') | ('S' << 8) | ('D' << 16) | ('_' << 24)
+
+const DISC_INTERFACE __io_gp2xsd = {
+	DEVICE_TYPE_GP2X_SD,
+	FEATURE_MEDIUM_CANREAD,// | FEATURE_MEDIUM_CANWRITE, // TODO - enable writing
+	(FN_MEDIUM_STARTUP)&sd_Startup,
+	(FN_MEDIUM_ISINSERTED)&sd_IsInserted,
+	(FN_MEDIUM_READSECTORS)&sd_ReadSectors,
+	NULL, // (FN_MEDIUM_WRITESECTORS)&sdio_WriteSectors,
+	(FN_MEDIUM_CLEARSTATUS)&sd_ClearStatus,
+	(FN_MEDIUM_SHUTDOWN)&sd_Shutdown
+};
+
+const DISC_INTERFACE* get_io_gp2xsd (void) {
+  return &__io_gp2xsd;
+}
+
+// initialization resources:
+//http://www.rjhcoding.com/avrc-sd-interface-2.php
+// https://yannik520.github.io/sdio.html#sec-3-6-3
+//https://www.microchip.com/forums/m191802.aspx
+
+// libfat... https://github.com/devkitPro/libnds/blob/master/source/arm9/dldi/sd.twl.c
+// https://github.com/devkitPro/libfat/blob/master/source/disc.c

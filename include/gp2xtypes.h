@@ -61,7 +61,6 @@
 /*!
 	\brief returns a number with the nth bit set.
 */
-#define BIT(n) (1 << (n))
 
 //! 8 bit unsigned integer.
 typedef uint8_t		uint8;
