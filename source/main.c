@@ -44,6 +44,13 @@ int main() {
   sdInit(sdInfo);
   if(sdInfo->isInserted) {
     uart_printf("Detected %dkb SD card\r\n", sdInfo->sizeKb);
+
+    uint8_t* buffer = (uint8_t*) malloc(512);
+    sdReadBlocks(0, 1, buffer);
+    uart_printf("Read one block\r\n");
+    for(int i = 0 ; i < 512 ; i++) {
+      uart_printf("0x%x\r\n", buffer[i]);
+    }
   } else {
     uart_printf("No SD card detected\r\n");
   }

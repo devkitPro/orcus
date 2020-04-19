@@ -7,6 +7,7 @@
 
 void sdSetClock(int hz) {
   REG16(SDIPRE) = (74649600 / hz) - 1;
+  orcus_delay(0x1000);
 }
 
 static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLongResponse, bool ignoreCrc) {
@@ -51,7 +52,7 @@ static int sd_waitReady() {
 static int sd_calculateSizeKb() {
   uint8_t csdStructure = (REG16(SDIRSP1) & 0xC000) >> 14;
   if(csdStructure > 1) { return -1; } // invalid CSD structure number
-  
+
   if(csdStructure == 0) {
     int readBlLen = 9;// REG16(SDIRSP2) & 0xF;
     int cSize = ((REG16(SDIRSP3) & 0x3FF) << 2) | ((REG16(SDIRSP4) & 0xC000) >> 14);
@@ -76,17 +77,21 @@ void sdInit(SdInfo* info) {
   REG16(SDICON) = SDICON_BYT_ORDER | SDICON_ENCLK(1);
   REG16(SDIDTimerL) = 0xFFFF;
   REG16(SDIDTimerH) = 0x001F;
+  REG16(SDIBSize) = 512;
   orcus_delay(0x1000);
     
-  if(sd_cmd(0, 0, false, false, false)) {
+  if(sd_cmd(0, 0, false, false, true)) {
+    uart_printf("CMD0 failed\r\n");
     return;
   }
 
   if(sd_cmd(8, 0x000001AA, true, false, false)) {
+    uart_printf("CMD8 failed\r\n");
     return;
   }
       
   if(sd_waitReady()) {
+    uart_printf("SD card never became ready\r\n");
     return;
   }
 
@@ -98,10 +103,60 @@ void sdInit(SdInfo* info) {
   if(sd_cmd(9, (rca << 16), true, true, false)) {
     return;
   }
+  int sizeKb = sd_calculateSizeKb();
+
+  // select card
+  if(sd_cmd(7, (rca << 16), true, false, false)) {
+    return;
+  }
+
+  // set bus to full width SD
+  /*  while(true) {
+  if(sd_cmd(55, 0, true, false, false)) {
+    continue;
+  }
+  if(!sd_cmd(6, 1, true, false, false)) {
+    break;
+  }
+  }*/
+  sdSetClock(SD_SPEED);
 
   info->isInserted = true;
-  info->sizeKb = sd_calculateSizeKb();
+  info->sizeKb = sizeKb;
   info->rca = rca;
+}
+
+void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
+  REG16(SDICmdSta) = 0x0200;
+  REG16(SDIDatSta) = 0x07FF;
+  REG16(SDIDatConL) = (2 << 12) | numberOfBlocks;
+  REG16(SDIDatConH) = 0x000A;
+  // TODO - if not sdhc, startBlock*512, rather than just startBlock as argument)
+  int response = sd_cmd(18, startBlock, true, false, false);
+  if(response) {
+    uart_printf("couldn't start reading\r\n");
+  } else {
+    REG16(SDICmdSta) = 0x1E00;
+
+    for(int block = 0 ; block < numberOfBlocks ; block++) {
+      for(int byte = 0 ; byte < 512 ; byte++) { // TODO - handle different block sizes
+	while(!(REG16(SDIFSTA) & (1 << 12))) { // TODO - we should handle errors and break out what would otherwise end up an infinite loop
+	  uart_printf("waiting for data to become available\r\n");
+	}
+	dest[(block*512)+byte] = REG8(SDIDAT);
+      }
+    }
+
+    uart_printf("read blocks\r\n");
+    while(!(REG16(SDIDatSta) & (1 << 4)));
+    REG16(SDIDatConL) |= (1 << 14);
+    if(sd_cmd(12, 0, true, false, false)) {
+      uart_printf("Couldn't stop transmission\r\n");
+    }
+    
+    // TODO - finish this, page 572 of MMSP2 databook
+  }
+  
 }
 
 void orcus_configure_sd() {

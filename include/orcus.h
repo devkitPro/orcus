@@ -134,5 +134,6 @@ typedef struct {
 } SdInfo;
 
 extern void sdInit(SdInfo* info);
+extern void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest);
 
 #endif

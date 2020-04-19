@@ -13,6 +13,7 @@ extern r16 IO_BASE;
 #define EG(offset, size) ((volatile r##size) (0xC0000000+offset))
 #define REG8(x) *((volatile r8) (0xC0000000+x))
 #define REG16(x) *((volatile r16) (0xC0000000+x))
+#define REG32(x) *((volatile r32) (0xC0000000+x))
 #define BIT(x) (1 << x)
 #define SET(reg, bit, onOff) ((reg&(~bit))|(onOff ? bit : 0))
 
@@ -392,6 +393,14 @@ extern r32 _fiq;
 #define SDIRSP5 0x1516
 #define SDIRSP6 0x1518
 #define SDIRSP7 0x151A
+
+#define SDIBSize 0x151E
+
+#define SDIFSTA 0x152A
+#define SDIDatSta 0x1528
+#define SDIDAT 0x152C
+
+#define SDIDatCnt 0x1524 // 32bit
 
 #define SDIDTimerL 0x1536
 #define SDIDTimerH 0x1538
