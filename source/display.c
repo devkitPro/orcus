@@ -37,7 +37,7 @@ void orcus_configure_display(bool isF200) {
     orcus_delay(50);
     REG16(GPIOBOUT) |= LCD_RESET;
 
-    //    REG16(GPIOLOUT) |= (1 << 11); // backlight on
+    REG16(GPIOLOUT) |= (1 << 11); // backlight on
   }
 }
 
