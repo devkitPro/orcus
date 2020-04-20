@@ -5,7 +5,7 @@
 #include <gp2xregs.h>
 #include <orcus.h>
 
-extern void orcus_configure_display();
+extern void orcus_configure_display(bool isF200);
 extern void orcus_init_syscalls();
 extern void orcus_configure_peripherals();
 
@@ -42,8 +42,11 @@ void gp2xInit() {
   // set up memory timings
   orcus_default_ram_timings();
 
-  orcus_configure_gpio();
-  orcus_configure_display();
+  // check if this is an f200
+  bool isF200 = gp2xIsF200();
+
+  orcus_configure_gpio(isF200);
+  orcus_configure_display(isF200);
 
   // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
 
@@ -178,4 +181,8 @@ uint32_t btnState() {
     | (d & (1<<11) ? STICK : 0)
     | (d & (1<<6) ? VOL_DOWN : 0)
     | (d & (1<<7) ? VOL_UP : 0);    
+}
+
+bool gp2xIsF200() {
+  return true;
 }

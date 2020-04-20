@@ -44,6 +44,8 @@ int main() {
   for(int i = 320*240 ; i-- ; )
     *(fb1+i) = 0xF800;
 
+  uart_printf("Testing for SD card\r\n");
+
   SdInfo* sdInfo = (SdInfo*) malloc(sizeof(SdInfo));
   sdInit(sdInfo);
   if(sdInfo->isInserted) {

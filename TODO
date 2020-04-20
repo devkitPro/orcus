@@ -40,3 +40,26 @@ mwh phys 0xC0001508 0x0369
 mdh phys 0xc000150a
 mdh phys 0xc000150c
 mdh phys 0xc000150e
+
+
+
+static struct mtd_partition partition_info[] = {
+        {
+                name:           "Bootloader",
+                size:           0x80000,
+                offset:         0,
+                mask_flags:     MTD_WRITEABLE,                          
+        }, {
+                name:           "Kernel",
+                size:           0x120000,
+                offset:         MTDPART_OFS_APPEND,
+        }, {
+                name:           "Param",
+                size:           0x60000,                                        
+                offset:         MTDPART_OFS_APPEND,
+        }, {
+                name:           "Filesystem",
+                size:           MTDPART_SIZ_FULL,                                       
+                offset:         MTDPART_OFS_APPEND,
+        }
+};

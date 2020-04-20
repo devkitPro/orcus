@@ -2,7 +2,7 @@
 #include <orcus.h>
 
 // NOTE! Using lots of magic numbers here which were just lifted straight from an F100 via JTAG while running official GPH firmware, after trying to figure out the values based on the data sheet took too long. These may be different for an F200, to confirm
-void orcus_configure_display() {
+void orcus_configure_display(bool isF200) {
   REG16(DISPCSETREG) = 0x5E00;//0x6000; // DISPCLKSRC(FPLL_CLK) | DISPCLKDIV(32) | DISPCLKPOL(0);
   REG16(DPC_CNTL) = PAL(0) | CISCYNC(0) | HDTV(0) | DOT(0) | INTERLACE(0) | SYNCCBCR(0) | ESAVEN(0) | DOF(2); //0x5
   REG16(DPC_CLKCNTL) = 0x10; //CLKSRC(2) | CLK2SEL(0) | CLK1SEL(0) | CLK1POL(0);
@@ -25,6 +25,20 @@ void orcus_configure_display() {
   REG16(DPC_FPIATV3) = 0xFFFF;
 
   REG16(DPC_CNTL) |= ENB(1);
+
+  if(isF200) {
+    //    REG16(GPIOLOUT) &= ~(1 << 11); // backlight off
+    REG16(GPIOFOUT) |= 0xC;
+
+    orcus_delay(20);
+    REG16(GPIOBOUT) |= LCD_RESET;
+    orcus_delay(50);
+    REG16(GPIOBOUT) &= ~LCD_RESET;
+    orcus_delay(50);
+    REG16(GPIOBOUT) |= LCD_RESET;
+
+    //    REG16(GPIOLOUT) |= (1 << 11); // backlight on
+  }
 }
 
 static RgbFormat rgbFormat; 

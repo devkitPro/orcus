@@ -23,7 +23,7 @@ extern char uart_putc(char c, bool isBlocking);
 extern char uart_getc(bool isBlocking);
 extern void uart_printf(const char* format, ...);
 
-extern void orcus_configure_gpio();
+extern void orcus_configure_gpio(bool isF200);
 
 /**
  * Delay for <loops> ticks. A tick is of arbitrary length.
@@ -135,5 +135,7 @@ typedef struct {
 
 extern void sdInit(SdInfo* info);
 extern void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest);
+
+extern bool gp2xIsF200();
 
 #endif
