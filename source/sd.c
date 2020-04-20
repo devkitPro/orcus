@@ -18,12 +18,11 @@ static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLong
   REG16(SDICmdArgL) = arg&0xFFFF;
   REG16(SDICmdArgH) = (arg&0xFFFF0000)>>16;
 
-  uint16_t commandReg = ((isLongResponse ? 1 : 0) << 10) | ((awaitResponse ? 1 : 0) << 9) | (1 << 8) | command | 0x40; // for some reason you have to set the upper two bits to 0b10
-  REG16(SDICmdCon) = commandReg;
+  REG16(SDICmdCon) = ((isLongResponse ? 1 : 0) << 10) | ((awaitResponse ? 1 : 0) << 9) | (1 << 8) | command | 0x40; // for some reason you have to set the upper two bits to 0b10
 
-  uint16_t statusReg = REG16(SDICmdSta);
+  volatile uint16_t statusReg = REG16(SDICmdSta);
   // wait for command to finish
-  if(awaitResponse) {
+  if(awaitResponse) {      
     while(!(statusReg & 0x200 || statusReg & 0x400)) {
       statusReg = REG16(SDICmdSta);
     }
@@ -76,12 +75,12 @@ void sdInit(SdInfo* info) {
   info->rca = -1;
   
   sdSetClock(INITIAL_SD_SPEED);
-  REG16(SDICON) = SDICON_BYT_ORDER | SDICON_ENCLK(1);
+  REG16(SDICON) = SDICON_BYT_ORDER | BIT(1) | SDICON_ENCLK(1);
   REG16(SDIDTimerL) = 0xFFFF;
   REG16(SDIDTimerH) = 0x001F;
   REG16(SDIBSize) = 512;
   orcus_delay(0x1000);
-    
+
   if(sd_cmd(0, 0, false, false, true)) {
     uart_printf("CMD0 failed\r\n");
     return;
@@ -129,34 +128,40 @@ void sdInit(SdInfo* info) {
 }
 
 void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
+  uart_printf("Reading %d blocks from SD, starting with block number %d\r\n", numberOfBlocks, startBlock);
   REG16(SDICmdSta) = 0x0200;
   REG16(SDIDatSta) = 0x07FF;
   REG16(SDIDatConL) = (2 << 12) | numberOfBlocks;
   REG16(SDIDatConH) = 0x000A;
+
+  bool isSdhc = false;
+
   // TODO - if not sdhc, startBlock*512, rather than just startBlock as argument)
-  int response = sd_cmd(18, startBlock, true, false, false);
-  if(response) {
+
+  if(sd_cmd(18, startBlock*(isSdhc ? 1 : 512), true, false, false)) {
     uart_printf("couldn't start reading\r\n");
   } else {
     REG16(SDICmdSta) = 0x1E00;
 
     for(int block = 0 ; block < numberOfBlocks ; block++) {
       for(int byte = 0 ; byte < 512 ; byte++) { // TODO - handle different block sizes
-	while(!(REG16(SDIFSTA) & (1 << 12))) { // TODO - we should handle errors and break out what would otherwise end up an infinite loop
-	  uart_printf("waiting for data to become available\r\n");
-	}
+	while(!(REG16(SDIFSTA) & (1 << 12))); // TODO - we should handle errors and break out what would otherwise end up an infinite loop
 	dest[(block*512)+byte] = REG8(SDIDAT);
       }
     }
 
-    uart_printf("read blocks\r\n");
-    while(!(REG16(SDIDatSta) & (1 << 4)));
+    while(!(REG16(SDIDatSta) & (1 << 4)));    
     REG16(SDIDatConL) |= (1 << 14);
-    if(sd_cmd(12, 0, true, false, false)) {
+    if(sd_cmd(12, 0, false, false, false)) {
       uart_printf("Couldn't stop transmission\r\n");
     }
-    
-    // TODO - finish this, page 572 of MMSP2 databook
+
+    if(REG16(SDIDatSta) & (1 << 10)) {
+      REG16(SDIDatSta) |= BIT(10);
+    }
+
+    REG16(SDIDatConL) = 0xFFFF;
+    REG16(SDIDatConH) = 0xFFFF;
   }
   
 }

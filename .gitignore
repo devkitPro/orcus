@@ -54,3 +54,5 @@ dkms.conf
 
 include/fat.h
 include/libfatversion.h
+\#*#
+.#*
