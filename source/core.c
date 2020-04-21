@@ -42,6 +42,9 @@ void gp2xInit() {
   // set up memory timings
   orcus_default_ram_timings();
 
+  // enable timer
+  REG16(TCONTROL) = 0x1;
+
   // check if this is an f200
   bool isF200 = gp2xIsF200();
 
@@ -65,6 +68,18 @@ void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int t
 
 void orcus_default_ram_timings() { orcus_set_ram_timings(7, 15, 2, 7, 7, 7, 7); }
 void orcus_fast_ram_timings() { orcus_set_ram_timings(5, 3, 0, 0, 0, 1, 1); }
+
+uint32_t timerGet() {
+  return REG32(TCOUNT);
+}
+
+uint32_t timerSet(uint32_t count) {
+  REG32(TCOUNT) = 0x0;
+  uint32_t currentCount = REG32(TCOUNT);
+  while(REG32(TCOUNT) == currentCount);
+  REG32(TCOUNT) = (count == 0 ? 1 : count); // NOTE - there seems to be a bug in the silicon prevent reset to 0
+  return currentCount;
+}
 
 void orcus_delay(int loops) {
   volatile int i = loops;

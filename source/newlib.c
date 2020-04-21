@@ -22,7 +22,16 @@ void *_sbrk_r(struct _reent *ptr, ptrdiff_t incr) {
 }
 
 int orcus_nanosleep(const struct timespec *req, struct timespec *rem) {
-  // TODO - need interrupts enabled to use the timer
+  const uint32_t sleepUntilS = 7407407+1; // counter increments every 0.135uS, so 1s is 7407407 clocks
+  for(time_t i = 0 ; i < req->tv_sec ; i++) {
+    timerSet(1);
+    while(timerGet() < sleepUntilS);    
+  }
+  
+  uint32_t sleepUntilNs = (req->tv_nsec/135)+1;
+  timerSet(1);
+  while(timerGet() < sleepUntilNs);
+
   return 0;
 }
 

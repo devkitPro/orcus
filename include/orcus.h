@@ -138,4 +138,8 @@ extern void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest);
 
 extern bool gp2xIsF200();
 
+// timer increments once every 0.135uS and overflows at 0xFFFFFFFF then carries on counting
+extern uint32_t timerGet();
+extern uint32_t timerSet(uint32_t count);
+
 #endif

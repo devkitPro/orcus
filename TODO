@@ -63,3 +63,10 @@ static struct mtd_partition partition_info[] = {
                 offset:         MTDPART_OFS_APPEND,
         }
 };
+
+// Not convinced the boot params are needed for executing a gp2x kernel
+        /* arch number of MMSP20-Board */
+        gd->bd->bi_arch_number = 395;
+
+        /* adress of boot parameters */
+        gd->bd->bi_boot_params = 0x00100100;

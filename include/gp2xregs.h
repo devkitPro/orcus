@@ -406,4 +406,7 @@ extern r32 _fiq;
 #define SDIDTimerL 0x1536
 #define SDIDTimerH 0x1538
 
+#define TCOUNT 0x0A00
+#define TCONTROL 0x0A14
+
 #endif
