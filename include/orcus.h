@@ -135,7 +135,6 @@ typedef struct {
 
 extern void sdInit(SdInfo* info);
 extern int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest);
-extern int sdWaitReady();
 
 extern bool gp2xIsF200();
 

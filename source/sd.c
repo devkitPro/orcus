@@ -1,6 +1,7 @@
 #include <gp2xregs.h>
 #include <orcus.h>
 #include <stddef.h>
+#include <unistd.h>
 #include "disc_io.h"
 
 #define MMC_SPEED 10000000
@@ -93,7 +94,6 @@ void sdInit(SdInfo* info) {
 
   for(int i = 100 ; i-- ; ) {
     if(!sd_cmd(0, 0, false, false, true)) {
-      uart_printf("CMD0 failed\r\n");
       break;
     }
 
@@ -144,50 +144,43 @@ void sdInit(SdInfo* info) {
   info->rca = rca;
 }
 
-int sdWaitReady() {
-  for(int i = 100 ; i-- ; ) {
-    volatile int r = sd_cmd(13, (rca << 16), true, false, false);
-    if(!r && ((REG16(SDIRSP0) >> 9) & 0xF) == 1) {
-      return 0;
-    }
-    uart_printf("status is: 0x%x and r was %d\r\n", REG16(SDIRSP0), r);
-  }
-  return 1;
-}
-
 int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
-  uart_printf("Reading %d blocks from SD, starting with block number %d\r\n", numberOfBlocks, startBlock);
   REG16(SDICmdSta) = 0x0200;
   REG16(SDIDatSta) = 0x07FF;
   REG16(SDIDatConL) = (2 << 12) | numberOfBlocks;
   REG16(SDIDatConH) = 0x000A;
+  REG16(SDICON) |= BIT(1);
 
   bool isSdhc = false;
 
-  // TODO - if not sdhc, startBlock*512, rather than just startBlock as argument)
-  //  if(sdWaitReady()) {
-  //   return 1;
-  //}
+  int attempts = 0;
 
+ CMD18:
   if(sd_cmd(18, startBlock*(isSdhc ? 1 : 512), true, false, false)) {
     uart_printf("couldn't start reading\r\n");
+    if((++attempts) > 2) {
+      return 1;
+    } else {
+      usleep(10);
+      goto CMD18;
+    }
   } else {
     REG16(SDICmdSta) = 0x1E00;
 
     for(int block = 0 ; block < numberOfBlocks ; block++) {
       for(int byte = 0 ; byte < 512 ; byte++) { // TODO - handle different block sizes
 	timerSet(0);
-	while(!(REG16(SDIFSTA) & (1 << 12))) {
-	}// TODO - we should handle errors
+	while((REG16(SDIFSTA)&0x7F) == 0);
 	dest[(block*512)+byte] = REG8(SDIDAT);
       }
     }
 
-    while(!(REG16(SDIDatSta) & (1 << 4)));    
+    REG16(SDICON) |= BIT(1);
     REG16(SDIDatConL) |= (1 << 14);
 
     if(sd_cmd(12, 0, false, false, false)) {
       uart_printf("Couldn't stop transmission\r\n");
+      return 2;
     }
 
     if(REG16(SDIDatSta) & (1 << 10)) {
