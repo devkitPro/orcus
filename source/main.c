@@ -39,9 +39,9 @@ int main() {
   rgbToggleRegion(REGION1, true);
   uart_printf("Enable RGB REGION1\r\n");
 
-  uart_printf("Waiting for 5 seconds\r\n");
-  usleep(5000000);
-  uart_printf("Finished waiting\r\n");
+  //  uart_printf("Waiting for 5 seconds\r\n");
+  //  usleep(5000000);
+  //  uart_printf("Finished waiting\r\n");
   
   for(int i = 320*240 ; i-- ; )
     *(fb0+i) = 0x1FE0;

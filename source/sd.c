@@ -7,9 +7,15 @@
 #define SD_SPEED 25000000
 #define INITIAL_SD_SPEED 100000
 
+static uint16_t rca;
+
 void sdSetClock(int hz) {
   REG16(SDIPRE) = (74649600 / hz) - 1;
   orcus_delay(0x1000);
+}
+
+bool timeout() {
+  return REG32(TCOUNT) > 250000; // just over 3ms
 }
 
 static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLongResponse, bool ignoreCrc) {
@@ -21,13 +27,16 @@ static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLong
   REG16(SDICmdCon) = ((isLongResponse ? 1 : 0) << 10) | ((awaitResponse ? 1 : 0) << 9) | (1 << 8) | command | 0x40; // for some reason you have to set the upper two bits to 0b10
 
   volatile uint16_t statusReg = REG16(SDICmdSta);
+  timerSet(0);
   // wait for command to finish
   if(awaitResponse) {      
     while(!(statusReg & 0x200 || statusReg & 0x400)) {
+      if(timeout()) { return 1; }
       statusReg = REG16(SDICmdSta);
     }
   } else {
     while(!(statusReg & 0x800)) {
+      if(timeout()) { return 1; }
       statusReg = REG16(SDICmdSta);
     }
   }
@@ -75,15 +84,23 @@ void sdInit(SdInfo* info) {
   info->rca = -1;
   
   sdSetClock(INITIAL_SD_SPEED);
+  REG16(SDIDatConL) = 0x4000; // make sure all Rx/Tx is halted before we go any further
   REG16(SDICON) = SDICON_BYT_ORDER | BIT(1) | SDICON_ENCLK(1);
   REG16(SDIDTimerL) = 0xFFFF;
   REG16(SDIDTimerH) = 0x001F;
   REG16(SDIBSize) = 512;
   orcus_delay(0x1000);
 
-  if(sd_cmd(0, 0, false, false, true)) {
-    uart_printf("CMD0 failed\r\n");
-    return;
+  for(int i = 100 ; i-- ; ) {
+    if(!sd_cmd(0, 0, false, false, true)) {
+      uart_printf("CMD0 failed\r\n");
+      break;
+    }
+
+    if(i == 0) {
+      uart_printf("CMD0 failed\r\n");
+      return;
+    }
   }
 
   if(sd_cmd(8, 0x000001AA, true, false, false)) {
@@ -99,7 +116,7 @@ void sdInit(SdInfo* info) {
   while(sd_cmd(2, 0, true, true, false));
   while(sd_cmd(3, 0, true, false, false));
 
-  uint16_t rca = REG16(SDIRSP1);
+  rca = REG16(SDIRSP1);
 
   if(sd_cmd(9, (rca << 16), true, true, false)) {
     return;
@@ -127,7 +144,18 @@ void sdInit(SdInfo* info) {
   info->rca = rca;
 }
 
-void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
+int sdWaitReady() {
+  for(int i = 100 ; i-- ; ) {
+    volatile int r = sd_cmd(13, (rca << 16), true, false, false);
+    if(!r && ((REG16(SDIRSP0) >> 9) & 0xF) == 1) {
+      return 0;
+    }
+    uart_printf("status is: 0x%x and r was %d\r\n", REG16(SDIRSP0), r);
+  }
+  return 1;
+}
+
+int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
   uart_printf("Reading %d blocks from SD, starting with block number %d\r\n", numberOfBlocks, startBlock);
   REG16(SDICmdSta) = 0x0200;
   REG16(SDIDatSta) = 0x07FF;
@@ -137,6 +165,9 @@ void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
   bool isSdhc = false;
 
   // TODO - if not sdhc, startBlock*512, rather than just startBlock as argument)
+  //  if(sdWaitReady()) {
+  //   return 1;
+  //}
 
   if(sd_cmd(18, startBlock*(isSdhc ? 1 : 512), true, false, false)) {
     uart_printf("couldn't start reading\r\n");
@@ -145,13 +176,16 @@ void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
 
     for(int block = 0 ; block < numberOfBlocks ; block++) {
       for(int byte = 0 ; byte < 512 ; byte++) { // TODO - handle different block sizes
-	while(!(REG16(SDIFSTA) & (1 << 12))); // TODO - we should handle errors and break out what would otherwise end up an infinite loop
+	timerSet(0);
+	while(!(REG16(SDIFSTA) & (1 << 12))) {
+	}// TODO - we should handle errors
 	dest[(block*512)+byte] = REG8(SDIDAT);
       }
     }
 
     while(!(REG16(SDIDatSta) & (1 << 4)));    
     REG16(SDIDatConL) |= (1 << 14);
+
     if(sd_cmd(12, 0, false, false, false)) {
       uart_printf("Couldn't stop transmission\r\n");
     }
@@ -163,13 +197,15 @@ void sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
     REG16(SDIDatConL) = 0xFFFF;
     REG16(SDIDatConH) = 0xFFFF;
   }
-  
+
+  return 0;
 }
 
 
 bool sd_Startup() {
-  uart_printf("sd_Startup invoked\r\n");
-  return true;
+  //  SdInfo* sdInfo = (SdInfo*) malloc(sizeof(SdInfo));
+  //  sdInit(sdInfo);
+  return true;//sdInfo->isInserted;
 }
 
 bool sd_IsInserted() {
@@ -178,7 +214,9 @@ bool sd_IsInserted() {
 }
 
 bool sd_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
-  sdReadBlocks(sector, numSectors, (uint8_t*) buffer);
+  if(sdReadBlocks(sector, numSectors, (uint8_t*) buffer)) {
+    return false;
+  }
   return true;
 }
 
