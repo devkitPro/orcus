@@ -42,7 +42,8 @@ _data_abort:            .word data_abort
 _not_used:              .word not_used
 _irq:                   .word irq
 _fiq:                   .word fiq
-
+	.balignl 16,0xdeadbeef
+	
 @---------------------------------------------------------------------------------
 @ AXF addresses
 @---------------------------------------------------------------------------------
@@ -57,11 +58,11 @@ _data_start:
 _bss_start:
 	.word   __bss_start
 _bss_end:
-	.word   __bss_end	
+	.word   __bss_end
 
 undefined_instruction:
 	subs pc,lr,#4
-
+	
 software_interrupt:
 	subs pc,lr,#4
 	
@@ -79,8 +80,7 @@ irq:
 	
 fiq:
 	subs pc,lr,#4
-
-
+	
 @---------------------------------------------------------------------------------
 _start2:
 @---------------------------------------------------------------------------------
@@ -120,8 +120,95 @@ clear_bss_loop:
 _call_main:
 @---------------------------------------------------------------------------------
 	mov		lr, #0
-	ldr		r3, =main
-	bx		r3
+	bl		main
+	b		run_bootloader
 
+@---------------------------------------------------------------------------------
+@ Load and execute bootloader from NAND
+@---------------------------------------------------------------------------------
+run_bootloader:
+@---------------------------------------------------------------------------------
+	// registers we use
+	#define NFDATA          0x9c000000
+	#define NFCMD           0x9C000010
+	#define NFADDR          0x9C000018
+	#define MEMNANDCTRLW    0xC0003A3A
+	#define MEMNANDTIMEW    0xC0003A3C
+
+	// load parameters
+	#define LOAD_ADDRESS	0x03E00000
+	#define LOAD_LENGTH	0x00080000
+	#define BLOCK_SIZE	512
+	
+	// set NAND timing
+	ldr		r1, =MEMNANDTIMEW
+	ldr		r0, =0x7F8
+	strh		r0, [r1]
+
+	// prepare load parameters
+	ldr		r3, =LOAD_LENGTH // next NAND address to read from, and number of bytes remaining
+	ldr		r4, =(LOAD_ADDRESS+LOAD_LENGTH) // current write-to address
+
+nand_read:
+	sub		r3, r3, #BLOCK_SIZE
+
+	// read one block
+	ldr		r1, =NFCMD
+	ldr		r0, =0x0
+	strb		r0, [r1]
+
+	// write address out one byte at a time
+	// K9F1208 databook page 8 says the addresses are sent a0-a7,a9-a16,a17-a24,a25 with a8 determined by cmd0 (0), or cmd1 (1) - meaning you have to explicitly read half pages
+	ldr		r1, =NFADDR
+
+	strb		r3, [r1]
+	mov		r0, r3, lsr #9
+	strb		r0, [r1]
+	mov		r0, r3, lsr #17
+	strb		r0, [r1]
+	mov		r0, r3, lsr #25
+	strb		r0, [r1]
+
+nand_read_wait:
+	ldr		r1, =MEMNANDCTRLW
+        ldrh		r0, [r1]
+	tst		r0, #0x80
+	beq		nand_read_wait
+
+	ldr		r1, =NFDATA
+	sub		r5, r4, #BLOCK_SIZE
+nand_copy_data:
+	ldrh		r0, [r1]
+	strh		r0, [r5]
+	add		r5, r5, #2
+	cmp		r5, r4
+	bne		nand_copy_data
+
+	sub		r4, r4, #BLOCK_SIZE
+	cmp		r3, #0
+	bne		nand_read
+
+	// now copy all bytes up to 0xdeadbeef to 0x0 in order to replace the vector table
+	ldr		r1, =LOAD_ADDRESS
+	ldr		r2, =0x0
+	ldr		r3, =0xdeadbeef
+copy_next_byte:
+	ldr		r0, [r1]
+	cmp		r0, r3
+	beq		launch_bootloader
+	str		r0, [r2]
+	add		r1, r1, #4
+	add		r2, r2, #4
+	b		copy_next_byte
+	
+launch_bootloader:	
+	// we are done, jump to bootloader
+	ldr		lr, =LOAD_ADDRESS
+	mov		pc, lr
+	
+@---------------------------------------------------------------------------------
+	
 	.pool
 	.end
+
+	

@@ -149,7 +149,7 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
   REG16(SDIDatSta) = 0x07FF;
   REG16(SDIDatConL) = (2 << 12) | numberOfBlocks;
   REG16(SDIDatConH) = 0x000A;
-  REG16(SDICON) |= BIT(1);
+  REG16(SDICON) |= BIT(1); // clear the FIFO before we try to read
 
   bool isSdhc = false;
 

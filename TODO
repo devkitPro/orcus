@@ -70,3 +70,12 @@ static struct mtd_partition partition_info[] = {
 
         /* adress of boot parameters */
         gd->bd->bi_boot_params = 0x00100100;
+
+
+// need to pad bootloader to 0x80000 bytes so we make sure to erase the complete area. We should then reserve the final 512 bytes for config
+
+// when loading uboot from SD card, need to check the first few bytes for 0x03E0... or whatever to find RESET vector, and load at that address
+
+// may need to try to obligerate code for loading from nand too if we are booting from SD
+
+// should be trivial, the code segment is easy to identify in a disassembly, just need to scan for the binary

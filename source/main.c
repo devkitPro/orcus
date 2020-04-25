@@ -96,6 +96,7 @@ int main() {
     if(btn & R) uart_printf("R pressed\r\n");*/
     
     if(btn & START) rgbSetFbAddress(fb0);
+    else if(btn & SELECT) return 0;
     else rgbSetFbAddress(fb1);
   }
 }
