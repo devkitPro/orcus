@@ -9,6 +9,11 @@
 #define INITIAL_SD_SPEED 100000
 
 static uint16_t rca;
+static int sizeKb = -1;
+
+int sdSizeKb() {
+  return sdIsInserted() ? sizeKb : -1;
+}
 
 void sdSetClock(int hz) {
   REG16(SDIPRE) = (74649600 / hz) - 1;
@@ -79,11 +84,7 @@ static int sd_calculateSizeKb() {
 }
 
 
-void sdInit(SdInfo* info) {
-  info->isInserted = false;
-  info->sizeKb = -1;
-  info->rca = -1;
-  
+int sdInit() {  
   sdSetClock(INITIAL_SD_SPEED);
   REG16(SDIDatConL) = 0x4000; // make sure all Rx/Tx is halted before we go any further
   REG16(SDICON) = SDICON_BYT_ORDER | BIT(1) | SDICON_ENCLK(1);
@@ -99,18 +100,18 @@ void sdInit(SdInfo* info) {
 
     if(i == 0) {
       uart_printf("CMD0 failed\r\n");
-      return;
+      return 1;
     }
   }
 
   if(sd_cmd(8, 0x000001AA, true, false, false)) {
     uart_printf("CMD8 failed\r\n");
-    return;
+    return 2;
   }
       
   if(sd_waitReady()) {
     uart_printf("SD card never became ready\r\n");
-    return;
+    return 3;
   }
 
   while(sd_cmd(2, 0, true, true, false));
@@ -119,13 +120,13 @@ void sdInit(SdInfo* info) {
   rca = REG16(SDIRSP1);
 
   if(sd_cmd(9, (rca << 16), true, true, false)) {
-    return;
+    return 4;
   }
-  int sizeKb = sd_calculateSizeKb();
+  sizeKb = sd_calculateSizeKb();
 
   // select card
   if(sd_cmd(7, (rca << 16), true, false, false)) {
-    return;
+    return 5;
   }
 
   // set bus to full width SD
@@ -139,9 +140,7 @@ void sdInit(SdInfo* info) {
   }*/
   sdSetClock(SD_SPEED);
 
-  info->isInserted = true;
-  info->sizeKb = sizeKb;
-  info->rca = rca;
+  return 0;
 }
 
 int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
@@ -196,9 +195,7 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
 
 
 bool sd_Startup() {
-  //  SdInfo* sdInfo = (SdInfo*) malloc(sizeof(SdInfo));
-  //  sdInit(sdInfo);
-  return true;//sdInfo->isInserted;
+  return sdIsInserted() && !sdInit();
 }
 
 bool sdIsInserted() {

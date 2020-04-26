@@ -3,45 +3,13 @@
 +------+
 
 Orcus:
-	* GPIO functions
-	* LCD functions
+	* LCD functions - blitter, yuv
 	* Audio
-	* SD card
+	* SD card - works and integrated with libfat, but needs improvement to be more reliable
 	* NAND
 	* ARM940T - this will require implementing the locks in __syscalls, to prevent mallocing the same thing (and also so you can actually use mutexes etc. if newlib provides them!). probably a shared heap ptr too? Will need to translate between the two
-
-
-Correct init sequence for SD:
-// go idle
-mwh phys 0xC000150a 0x0F00
-mwh phys 0xC0001504 0x0000
-mwh phys 0xC0001506 0x0000
-mwh phys 0xC0001508 0x0140
-mdh phys 0xc000150a
-
-// check sd version
-mwh phys 0xC000150a 0x0F00
-mwh phys 0xC0001504 0x01AA
-mwh phys 0xC0001506 0x0000
-mwh phys 0xC0001508 0x0348
-mdh phys 0xc000150a
-
-// cmd 55 - acmd41
-mwh phys 0xC000150a 0x0F00
-mwh phys 0xC0001504 0x0000
-mwh phys 0xC0001506 0x0000
-mwh phys 0xC0001508 0x0377
-mdh phys 0xc000150a
-
-mwh phys 0xC000150a 0x0F00
-mwh phys 0xC0001504 0x0000
-mwh phys 0xC0001506 0x0000
-mwh phys 0xC0001508 0x0369
-mdh phys 0xc000150a
-mdh phys 0xc000150c
-mdh phys 0xc000150e
-
-
+	* F200 detection
+	* F200 touchscreen
 
 static struct mtd_partition partition_info[] = {
         {
@@ -83,4 +51,18 @@ static struct mtd_partition partition_info[] = {
 // imagemagick render text in font to build a spritesheet?
 e.g. terminus font is bdf
 // need this list of characters in order of ascii
-convert -font ter-u28n.bdf -pointsize 28 label:"\\ \!\"#$\\%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_\`abcdefghijklmnopqrstuvwxyz{|}~" test.png
+convert -font ter-u28n.bdf -pointsize 28 label:"\\ \!\"#$\\%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_\`abcdefghijklmnopqrstuvwxyz{|}~" font.png
+
+
+Executable header for bootloader -
+Magic number to identify file - GP2XRAW1.0
+32 character title
+Load address - where in memory to copy code
+8 bytes of additional information - e.g. compressed flag, is kernel
+32x32 icon in rgb565
+[start of code]
+
+code should have 0xdeadbeef at end of crt0. The bootloader will copy from start of code to 0xdeadbeef to 0x0 in memory, then jump to 0x0 - this lets us load code at any arbitrary address while correctly setting up vector table, so we can load e.g. gp2xboot.img as an executable just by affixing it with the appropriate header
+
+
+

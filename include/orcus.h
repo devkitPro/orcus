@@ -133,9 +133,10 @@ typedef struct {
   uint16_t rca;
 } SdInfo;
 
-extern void sdInit(SdInfo* info);
+extern int sdInit();
 extern int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest);
 extern bool sdIsInserted();
+extern int sdSizeKb();
 
 extern bool gp2xIsF200();
 

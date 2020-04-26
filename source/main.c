@@ -49,13 +49,9 @@ int main() {
     *(fb1+i) = 0xF800;
 
   uart_printf("Testing for SD card\r\n");
-
-  SdInfo* sdInfo = (SdInfo*) malloc(sizeof(SdInfo));
-  sdInit(sdInfo);
-  if(sdInfo->isInserted) {
-    uart_printf("Detected %dkb SD card\r\n", sdInfo->sizeKb);
-
-    fatInitDefault();
+  if(fatInitDefault()) {
+    uart_printf("Detected %dkb SD card\r\n", sdSizeKb());
+    
     DIR *dp;
     struct dirent *ep;
 
