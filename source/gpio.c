@@ -55,7 +55,9 @@ void orcus_configure_gpio(bool isF200) {
     | (ALTFN1 << 2)
     | (ALTFN1 << 0);
   REG16(GPIOLPUENB) |= 0x003F;
-
+  // set I14 to in, with pull up in order to detect SD card
+  REG16(GPIOIALTFNHI) = (REG16(GPIOIALTFNHI)&~(0x3 << 12)) | (IN << 12);
+  REG16(GPIOIPUENB) = REG16(GPIOIPUENB) & 0xBFFF;
 
   REG16(GPIOHALTFNLOW) = REG16(GPIOHALTFNLOW)
     | (OUT << 8)

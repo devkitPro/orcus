@@ -51,6 +51,9 @@ void gp2xInit() {
   orcus_configure_gpio(isF200);
   orcus_configure_display(isF200);
 
+  // set up NAND timings
+  REG16(MEMNANDTIMEW) = 0x7F8;
+  
   // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
 
   // establish memory map - TODO - this formula isn't correct for some reason, we should be getting 0x3FFDF00

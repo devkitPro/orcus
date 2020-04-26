@@ -205,6 +205,7 @@ extern r32 _fiq;
 #define GPIOHALTFNLOW 0x102E
 #define GPIOHALTFNHI 0x104E
 #define GPIOLALTFNLOW 0x1036
+#define GPIOIALTFNHI 0x1050
 #define GPIOLALTFNHI 0x1056
 #define GPIOFALTFNLOW 0x102A
 
@@ -241,6 +242,7 @@ extern r32 _fiq;
 #define GPIOOPINLVL 0x119C
 
 #define GPIOBPUENB 0x10C2
+#define GPIOIPUENB 0x10D0
 #define GPIOLPUENB 0x10D6
 
 #define IN 0x0
@@ -409,4 +411,12 @@ extern r32 _fiq;
 #define TCOUNT 0x0A00
 #define TCONTROL 0x0A14
 
+#define NAND_BLOCK_SIZE 512
+#define MEMNANDCTRLW 0x3A3A
+#define MEMNANDTIMEW 0x3A3C
+
+#define REG_NFDATA *((volatile r16) 0x9C000000)
+#define REG_NFCMD *((volatile r8) 0x9C000010)
+#define REG_NFADDR *((volatile r8) 0x9C000018)
+  
 #endif

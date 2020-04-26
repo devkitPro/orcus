@@ -79,3 +79,8 @@ static struct mtd_partition partition_info[] = {
 // may need to try to obligerate code for loading from nand too if we are booting from SD
 
 // should be trivial, the code segment is easy to identify in a disassembly, just need to scan for the binary
+
+// imagemagick render text in font to build a spritesheet?
+e.g. terminus font is bdf
+// need this list of characters in order of ascii
+convert -font ter-u28n.bdf -pointsize 28 label:"\\ \!\"#$\\%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_\`abcdefghijklmnopqrstuvwxyz{|}~" test.png

@@ -201,9 +201,8 @@ bool sd_Startup() {
   return true;//sdInfo->isInserted;
 }
 
-bool sd_IsInserted() {
-  uart_printf("sd_IsInserted invoked\r\n");
-  return true;
+bool sdIsInserted() {
+  return (REG16(GPIOIPINLVL) & 0x4000) == 0;
 }
 
 bool sd_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
@@ -227,7 +226,7 @@ const DISC_INTERFACE __io_gp2xsd = {
 	DEVICE_TYPE_GP2X_SD,
 	FEATURE_MEDIUM_CANREAD,// | FEATURE_MEDIUM_CANWRITE, // TODO - enable writing
 	(FN_MEDIUM_STARTUP)&sd_Startup,
-	(FN_MEDIUM_ISINSERTED)&sd_IsInserted,
+	(FN_MEDIUM_ISINSERTED)&sdIsInserted,
 	(FN_MEDIUM_READSECTORS)&sd_ReadSectors,
 	NULL, // (FN_MEDIUM_WRITESECTORS)&sdio_WriteSectors,
 	(FN_MEDIUM_CLEARSTATUS)&sd_ClearStatus,
