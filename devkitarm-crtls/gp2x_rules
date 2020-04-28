@@ -2,7 +2,7 @@
 
 PORTLIBS	:=	$(PORTLIBS_PATH)/gp2x $(PORTLIBS_PATH)/armv4
 
-LIBORCUS	:=	$(DEVKITPRO)/orcus
+LIBORCUS	:=	$(DEVKITPRO)/liborcus
 
 #---------------------------------------------------------------------------------
 %.elf:

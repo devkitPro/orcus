@@ -1,107 +1,77 @@
 #---------------------------------------------------------------------------------
-# Clear the implicit built in rules
-#---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
 ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM)
 endif
-
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPro)
+endif
 include $(DEVKITARM)/gp2x_rules
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# INCLUDES is a list of directories containing extra header files
-#---------------------------------------------------------------------------------
-TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source data
-INCLUDES	:=	include
+SOURCES		:=	source
+INCLUDES	:=	include build
+DATA		:=	data
+
+
+export ORCUS_MAJOR	:= 0
+export ORCUS_MINOR	:= 1
+export ORCUS_PATCH	:= 0
+
+VERSION	:=	$(ORCUS_MAJOR).$(ORCUS_MINOR).$(ORCUS_PATCH)
+
+ARCH	:=	
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-ARCH	:=	
+CFLAGS	:=	-g -O3 -Wall -Wno-switch -Wno-multichar -mtune=arm9tdmi -fomit-frame-pointer -ffast-math $(ARCH) $(INCLUDE)
+ASFLAGS	:=	-g -Wa,--warn $(ARCH)
 
-CFLAGS	:=	-Wall -O2 -mtune=arm9tdmi \
-		-fomit-frame-pointer \
-		-ffast-math \
-		$(ARCH)
-
-CFLAGS	+=	$(INCLUDE)
-
-AFLAGS	:=	$(ARCH)
-LDFLAGS	=	$(ARCH) -Wl,-Map,$(notdir $@).map
-
-#---------------------------------------------------------------------------------
-# path to tools - this can be deleted if you set the path in windows
-#---------------------------------------------------------------------------------
-export PATH		:=	$(DEVKITARM)/bin:$(PATH)
-
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project
-#---------------------------------------------------------------------------------
-LIBS		:=	-lfat
-# TODO -lorcus
-
-
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBORCUS)
-
-
-#---------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
-#---------------------------------------------------------------------------------
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export TARGET	:=	$(CURDIR)/lib/liborcus.a
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
-
+export VPATH	:=	$(foreach dir,$(DATA),$(CURDIR)/$(dir)) $(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
 
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BMPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bmp)))
-BINFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
+BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-	export LD	:=	$(CC)
-else
-	export LD	:=	$(CXX)
-endif
+export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
 
-export OFILES	:=	$(BINFILES:.bin=.o) $(BMPFILES:.bmp=.o)\
-					$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					-I$(CURDIR)/$(BUILD)
+export OFILES	:=	$(OFILES_BIN) $(OFILES_SRC)
 
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+export HFILES	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
-.PHONY: $(BUILD) clean
+export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir))
+export DEPSDIR	:=	$(CURDIR)/build
 
-#---------------------------------------------------------------------------------
+.PHONY: $(BUILD) clean docs
+
 $(BUILD):
+	@[ -d lib ] || mkdir -p lib
 	@[ -d $@ ] || mkdir -p $@
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
-#---------------------------------------------------------------------------------
+docs:
+	doxygen orcus.dox
+
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) *.elf
+	@rm -fr $(BUILD) lib *.tar.bz2
+
+dist: $(BUILD)
+	@tar --exclude=*CVS* --exclude=.svn --exclude=*~ --exclude=*build* --exclude=*.bz2 -cvjf orcus-src-$(VERSION).tar.bz2 include source Makefile LICENSE README.md
+	@tar --exclude=*CVS* --exclude=.svn --exclude=*~ -cvjf orcus-$(VERSION).tar.bz2 include lib LICENSE README.md
+
+install: dist
+	mkdir -p $(DESTDIR)$(DEVKITPRO)/liborcus
+	bzip2 -cd orcus-$(VERSION).tar.bz2 | tar -xvf - -C $(DESTDIR)$(DEVKITPRO)/liborcus
 
 
 #---------------------------------------------------------------------------------
@@ -110,13 +80,17 @@ else
 DEPENDS	:=	$(OFILES:.o=.d)
 
 #---------------------------------------------------------------------------------
-# main targets
-#---------------------------------------------------------------------------------
-$(OUTPUT).elf	:	$(OFILES)
+$(TARGET): $(OFILES)
 
+$(OFILES_SRC)	: $(HFILES)
+
+#---------------------------------------------------------------------------------
+%.a: $(OFILES)
+	@echo $@
+	@rm -f $@
+	@$(AR) rcs $@ $(OFILES)
 
 -include $(DEPENDS)
 
-#---------------------------------------------------------------------------------------
 endif
-#---------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------

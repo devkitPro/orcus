@@ -5,7 +5,7 @@
 Orcus:
 	* LCD functions - blitter, yuv
 	* Audio
-	* SD card - works and integrated with libfat, but needs improvement to be more reliable
+	* SD card - works and integrated with libfat, but needs improvement to be more reliable, work with more types of card, use full bus width when available, and DMA for speed
 	* NAND
 	* ARM940T - this will require implementing the locks in __syscalls, to prevent mallocing the same thing (and also so you can actually use mutexes etc. if newlib provides them!). probably a shared heap ptr too? Will need to translate between the two
 	* F200 detection
