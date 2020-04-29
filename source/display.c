@@ -136,3 +136,21 @@ void rgbSetRegionPosition(RgbRegion region, int x, int y, int width, int height)
     REG16(baseAddr+6) = y + height - 1;
   }
 }
+
+bool lcdVSync() {
+  return REG16(GPIOBPINLVL) & BIT(4) ? true : false;
+}
+
+void lcdWaitNextVSync() {
+  while(lcdVSync());
+  while(!lcdVSync());
+}
+
+bool lcdHSync() {
+  return REG16(GPIOBPINLVL) & BIT(5) ? true : false;
+}
+
+void lcdWaitNextHSync() {
+  while(lcdHSync());
+  while(!lcdHSync());
+}

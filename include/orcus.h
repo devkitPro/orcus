@@ -124,6 +124,10 @@ extern void rgbRegionNoBlend(RgbRegion region);
 extern void rgbSetScale(int srcW, int srcH);
 extern void rgbSetFbAddress(void* fb);
 extern void rgbSetRegionPosition(RgbRegion region, int x, int y, int width, int height);
+extern bool lcdVSync();
+extern void lcdWaitNextVSync();
+extern bool lcdHSync();
+extern void lcdWaitNextHSync();
 
 extern uint32_t btnState();
 
