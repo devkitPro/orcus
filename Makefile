@@ -73,7 +73,6 @@ install: dist
 	mkdir -p $(DESTDIR)$(DEVKITPRO)/liborcus
 	bzip2 -cd orcus-$(VERSION).tar.bz2 | tar -xvf - -C $(DESTDIR)$(DEVKITPRO)/liborcus
 
-
 #---------------------------------------------------------------------------------
 else
 
@@ -89,6 +88,11 @@ $(OFILES_SRC)	: $(HFILES)
 	@echo $@
 	@rm -f $@
 	@$(AR) rcs $@ $(OFILES)
+
+%_bmp.h %.bmp.o: %.bmp
+	@echo $(notdir $<)
+	bmp2bin -q $< $@
+	@$(bin2o)
 
 -include $(DEPENDS)
 
