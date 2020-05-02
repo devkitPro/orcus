@@ -9,8 +9,6 @@ extern void orcus_configure_display(bool isF200);
 extern void orcus_init_syscalls();
 extern void orcus_configure_peripherals();
 
-r16 IO_BASE = (r16) 0xC0000000;
-
 void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t statusBit) {
   REG16(setVReg) = value;
   while(REG16(CLKCHGSTREG)&statusBit);

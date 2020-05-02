@@ -25,4 +25,3 @@ If the following symbols are declared (e.g. in ldflags -Xlinker --defsym=__testS
 | __io_base | base address of IO registers |
 | __nand_io_base | base address of NAND IO registers |
 | __end_of_heap | pointer to end of available heap space |
-| __io_base | base address of IO registers |
