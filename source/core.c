@@ -50,7 +50,7 @@ void gp2xInit() {
   // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
 
   extern void* heap_ptr;
-  heap_ptr = (void*)&__heap_start;
+  heap_ptr = (void*)&__start_of_heap;
 }
 
 void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD) {

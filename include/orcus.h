@@ -7,7 +7,7 @@
 typedef uint8_t uint4_t;
 
 // memory layout from linker and init function
-extern uint32_t __heap_start;
+extern uint32_t __start_of_heap;
 
 // orcus system functions
 extern void gp2xInit();
