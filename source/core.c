@@ -11,11 +11,6 @@ extern void orcus_configure_peripherals();
 
 r16 IO_BASE = (r16) 0xC0000000;
 
-extern uint32_t __stack_base;
-extern uint32_t __int_stack_size;
-extern uint32_t __usr_stack_size;
-uint32_t __heap_end;
-
 void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t statusBit) {
   REG16(setVReg) = value;
   while(REG16(CLKCHGSTREG)&statusBit);
@@ -55,10 +50,6 @@ void gp2xInit() {
   REG16(MEMNANDTIMEW) = 0x7F8;
   
   // TODO understand the interrupt subsystem, seems pretty simple, jut specify fiq/irq for each type, and there is a register which the ISR can read to see what caused it - chapter 8 'interrupt controller'
-
-  // establish memory map - TODO - this formula isn't correct for some reason, we should be getting 0x3FFDF00
-  __heap_end = __stack_base - __int_stack_size - __int_stack_size - __usr_stack_size;
-  uart_printf("heapend: 0x%08x\r\n", __heap_end);
 
   extern void* heap_ptr;
   heap_ptr = (void*)&__heap_start;

@@ -9,9 +9,10 @@
 #undef errno
 
 void* heap_ptr;
+extern uint32_t __end_of_heap;
 
 void *_sbrk_r(struct _reent *ptr, ptrdiff_t incr) {
-  if ((heap_ptr + incr) < (void*)__heap_end) {
+  if ((heap_ptr + incr) < (void*)__end_of_heap) {
     void *base = heap_ptr;
     heap_ptr += incr;
     return base;
