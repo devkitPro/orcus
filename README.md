@@ -2,8 +2,7 @@
 Low level library for GP2X
 
 To launch an elf executable via JTAG...
-<pre><code>
-sudo openocd -f gp2x-openocd.cfg
+<pre><code>sudo openocd -f gp2x-openocd.cfg
 
 $DEVKITARM/bin/arm-none-eabi-gdb
 exec-file YOUR.elf
