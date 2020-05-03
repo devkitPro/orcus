@@ -14,7 +14,7 @@ extern volatile void* __io_base;
 #define REG32(x) *((r32) (((uint32_t)&__io_base)+x))
 
 extern void* __nand_io_base;
-#define NANDREG8(x) *((r16) (((uint32_t)&__nand_io_base)+x))
+#define NANDREG8(x) *((r8) (((uint32_t)&__nand_io_base)+x))
 #define NANDREG16(x) *((r16) (((uint32_t)&__nand_io_base)+x))
 
 #define BIT(x) (1 << x)
