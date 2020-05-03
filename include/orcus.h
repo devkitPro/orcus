@@ -152,4 +152,6 @@ extern uint32_t timerSet(uint32_t count);
 
 extern void nandRead(uint32_t startAdddr, int numberOfBlocks, void* dest);
 
+extern void enableICache();
+
 #endif
