@@ -52,13 +52,16 @@ static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLong
 static int sd_waitReady() {
   // apparently you have to repeat this sequence many times for some cards, u-boot does it 150 times, wait  for card to be ready
   for(int i = 0 ; i < 150 ; i++) {
-    usleep(20000);
-    if(sd_cmd(55, 0, true, false, false)) { continue; }
+    if(sd_cmd(55, 0, true, false, false)) {
+      usleep(20000);
+      continue;
+    }
     if(!sd_cmd(41, 0xff8000 | (1 << 30), true, false, true)) { // we do support SDHC/SDXC
       if(REG16(SDIRSP1) & 0x8000) {
 	return 0;
       } //  else card not ready
     }
+    usleep(20000);
   }
   return 1;
 }
@@ -81,11 +84,15 @@ static int sd_calculateSizeKb() {
   }  
 }
 
-void cmd13() {
-    int out = sd_cmd(13, (rca << 16), true, false, false);
-  uart_printf("cmd13 is %d\n", out);
-  uart_printf("status reg is 0x%x%x\n", REG16(SDIRSP1), REG16(SDIRSP0));
+uint32_t r1() {
+  return REG16(SDIRSP1) << 16 | REG16(SDIRSP0);
+}
 
+uint32_t cmd13() {
+  if(!sd_cmd(13, (rca << 16), true, false, false)) {
+    return r1();
+  }
+  return 0xFFFFFFFF;
 }
 
 
@@ -152,21 +159,25 @@ int sdInit() {
 }
 
 int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
-  REG16(SDICmdSta) = 0x0200;
+  bool isSdhc = true;
+  int attempts = 0;
+  
+ CMD18:
+  REG16(SDICmdSta) = 0xFFFF;
   REG16(SDIDatSta) = 0x07FF;
   REG16(SDIDatConL) = (2 << 12) | numberOfBlocks;
   REG16(SDIDatConH) = 0x000A;
   REG16(SDICON) |= BIT(1); // clear the FIFO before we try to read
-
-  bool isSdhc = true;
-
-  int attempts = 0;
   
- CMD18:
   if(sd_cmd(18, startBlock*(isSdhc ? 1 : 512), true, false, false)) {
-    if((++attempts) > 50) {
+    if(cmd13()&0x400000) { // sometimes the card seems to get confused and stuck in data mode, reinit if we start getting illegal command responses
+      uart_printf("Reinit\n");
+      sdInit();
+    }
+    if(attempts > 5) {
       return 1;
     } else {
+      attempts++;
       usleep(20000);
       goto CMD18;
     }
@@ -185,17 +196,15 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
       }
     }
 
+    REG16(SDIDatConL) |= BIT(14);
     REG16(SDICON) |= BIT(1);
-    REG16(SDIDatConL) |= (1 << 14);
-
-    if(sd_cmd(12, 0, false, false, false)) {
+    
+    if(sd_cmd(12, 0, true, false, false)) {
       uart_printf("Couldn't stop transmission\r\n");
       return 2;
     }
 
-    if(REG16(SDIDatSta) & (1 << 10)) {
-      REG16(SDIDatSta) |= BIT(10);
-    }
+    REG16(SDICON) |= BIT(1);
 
     REG16(SDIDatConL) = 0xFFFF;
     REG16(SDIDatConH) = 0xFFFF;
