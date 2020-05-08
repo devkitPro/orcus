@@ -5,8 +5,8 @@
 #include "disc_io.h"
 
 #define MMC_SPEED 10000000
-#define SD_SPEED 25000000
-#define INITIAL_SD_SPEED 100000
+#define SD_SPEED 20000000
+#define INITIAL_SD_SPEED 400000
 
 static uint16_t rca;
 static int sizeKb = -1;
@@ -17,11 +17,11 @@ int sdSizeKb() {
 
 void sdSetClock(int hz) {
   REG16(SDIPRE) = (74649600 / hz) - 1;
-  orcus_delay(0x1000);
+  usleep(20000);
 }
 
 bool timeout() {
-  return REG32(TCOUNT) > 250000; // just over 3ms
+  return REG32(TCOUNT) > 250000;
 }
 
 static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLongResponse, bool ignoreCrc) {
@@ -33,16 +33,13 @@ static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLong
   REG16(SDICmdCon) = ((isLongResponse ? 1 : 0) << 10) | ((awaitResponse ? 1 : 0) << 9) | (1 << 8) | command | 0x40; // for some reason you have to set the upper two bits to 0b10
 
   volatile uint16_t statusReg = REG16(SDICmdSta);
-  timerSet(0);
   // wait for command to finish
   if(awaitResponse) {      
     while(!(statusReg & 0x200 || statusReg & 0x400)) {
-      if(timeout()) { return 1; }
       statusReg = REG16(SDICmdSta);
     }
   } else {
     while(!(statusReg & 0x800)) {
-      if(timeout()) { return 1; }
       statusReg = REG16(SDICmdSta);
     }
   }
@@ -55,6 +52,7 @@ static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLong
 static int sd_waitReady() {
   // apparently you have to repeat this sequence many times for some cards, u-boot does it 150 times, wait  for card to be ready
   for(int i = 0 ; i < 150 ; i++) {
+    usleep(20000);
     if(sd_cmd(55, 0, true, false, false)) { continue; }
     if(!sd_cmd(41, 0xff8000 | (1 << 30), true, false, true)) { // we do support SDHC/SDXC
       if(REG16(SDIRSP1) & 0x8000) {
@@ -81,6 +79,13 @@ static int sd_calculateSizeKb() {
   } else {
     return (REG16(SDIRSP4) + 1)*512;
   }  
+}
+
+void cmd13() {
+    int out = sd_cmd(13, (rca << 16), true, false, false);
+  uart_printf("cmd13 is %d\n", out);
+  uart_printf("status reg is 0x%x%x\n", REG16(SDIRSP1), REG16(SDIRSP0));
+
 }
 
 
@@ -124,11 +129,6 @@ int sdInit() {
   }
   sizeKb = sd_calculateSizeKb();
 
-  // select card
-  if(sd_cmd(7, (rca << 16), true, false, false)) {
-    return 5;
-  }
-
   // set bus to full width SD
   /*  while(true) {
   if(sd_cmd(55, 0, true, false, false)) {
@@ -140,6 +140,14 @@ int sdInit() {
   }*/
   sdSetClock(SD_SPEED);
 
+  //  cmd13();
+  
+  // select card
+  if(sd_cmd(7, (rca << 16), true, false, false)) {
+    return 5;
+  }
+
+  
   return 0;
 }
 
@@ -150,17 +158,16 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
   REG16(SDIDatConH) = 0x000A;
   REG16(SDICON) |= BIT(1); // clear the FIFO before we try to read
 
-  bool isSdhc = false;
+  bool isSdhc = true;
 
   int attempts = 0;
-
+  
  CMD18:
   if(sd_cmd(18, startBlock*(isSdhc ? 1 : 512), true, false, false)) {
-    uart_printf("couldn't start reading\r\n");
-    if((++attempts) > 2) {
+    if((++attempts) > 50) {
       return 1;
     } else {
-      usleep(10);
+      usleep(20000);
       goto CMD18;
     }
   } else {
@@ -169,7 +176,11 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
     for(int block = 0 ; block < numberOfBlocks ; block++) {
       for(int byte = 0 ; byte < 512 ; byte++) { // TODO - handle different block sizes
 	timerSet(0);
-	while((REG16(SDIFSTA)&0x7F) == 0);
+	while((REG16(SDIFSTA)&0x7F) == 0) {
+	  if(timeout()) {
+	    goto CMD18;
+	  }
+	}
 	dest[(block*512)+byte] = REG8(SDIDAT);
       }
     }
@@ -203,10 +214,7 @@ bool sdIsInserted() {
 }
 
 bool sd_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
-  if(sdReadBlocks(sector, numSectors, (uint8_t*) buffer)) {
-    return false;
-  }
-  return true;
+  return !sdReadBlocks(sector, numSectors, (uint8_t*) buffer);
 }
 
 bool sd_ClearStatus() {
