@@ -5,6 +5,10 @@ PORTLIBS	:=	$(PORTLIBS_PATH)/gp2x $(PORTLIBS_PATH)/armv4
 LIBORCUS	:=	$(DEVKITPRO)/liborcus
 
 #---------------------------------------------------------------------------------
+%.o2x: %.bin
+	@echo building o2x executable
+	@mko2x --name "$(TITLE)" --out $@ --section $< 0x0
+
 %.bin: %.elf
 	@echo extracting raw binary
 	@$(OBJCOPY) -O binary $< $@
