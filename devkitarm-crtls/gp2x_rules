@@ -5,6 +5,10 @@ PORTLIBS	:=	$(PORTLIBS_PATH)/gp2x $(PORTLIBS_PATH)/armv4
 LIBORCUS	:=	$(DEVKITPRO)/liborcus
 
 #---------------------------------------------------------------------------------
+%.bin: %.elf
+	@echo extracting raw binary
+	@$(OBJCOPY) -O binary $< $@
+
 %.elf:
 	@echo linking binary
 	@$(LD)  $(LDFLAGS) -specs=gp2x.specs $(OFILES) $(LIBPATHS) $(LIBS) -o $@
