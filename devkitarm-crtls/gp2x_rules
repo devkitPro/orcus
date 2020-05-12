@@ -7,7 +7,7 @@ LIBORCUS	:=	$(DEVKITPRO)/liborcus
 #---------------------------------------------------------------------------------
 %.o2x: %.bin
 	@echo building o2x executable
-	@mko2x --name "$(TITLE)" --out $@ --section $< 0x0
+	@mko2x --name "$(TITLE)" --out $@ --section $< 0x0 $(MKO2X_PARAMS)
 
 %.bin: %.elf
 	@echo extracting raw binary
