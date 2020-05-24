@@ -5,6 +5,7 @@
 void nandRead(uint32_t startAddr, int numberOfBlocks, void* dest) {
   uint16_t* d = (uint16_t*) dest;
   uint32_t addr = startAddr;
+  REG16(MEMNANDCTRLW) = 0x8080;
   for(int i = numberOfBlocks ; i-- ; ) {
     NANDREG8(NFCMD) = 0;
     NANDREG8(NFADDR) = (addr&0xFF);
