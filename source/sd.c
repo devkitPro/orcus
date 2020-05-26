@@ -10,6 +10,7 @@
 
 static uint16_t rca;
 static int sizeKb = -1;
+static bool isSdhc = false;
 
 int sdSizeKb() {
   return sdIsInserted() ? sizeKb : -1;
@@ -80,6 +81,7 @@ static int sd_calculateSizeKb() {
     int blockNr = (cSize)+1 * mult;
     return blockNr * blockLen; // TODO - I think this is wrong
   } else {
+    isSdhc = true;
     return (REG16(SDIRSP4) + 1)*512;
   }  
 }
@@ -125,7 +127,7 @@ int sdInit() {
     uart_printf("SD card never became ready\r\n");
     return 3;
   }
-
+  
   while(sd_cmd(2, 0, true, true, false));
   while(sd_cmd(3, 0, true, false, false));
 
@@ -153,15 +155,13 @@ int sdInit() {
   if(sd_cmd(7, (rca << 16), true, false, false)) {
     return 5;
   }
-
   
   return 0;
 }
 
 int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
-  bool isSdhc = true;
   int attempts = 0;
-  
+
  CMD18:
   REG16(SDICmdSta) = 0xFFFF;
   REG16(SDIDatSta) = 0x07FF;
