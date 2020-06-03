@@ -8,9 +8,12 @@
 #define SD_SPEED 20000000
 #define INITIAL_SD_SPEED 400000
 
+#define ILLEGAL_COMMAND BIT(22)
+
 static uint16_t rca;
 static int sizeKb = -1;
-static bool isSdhc = false;
+static bool isMMC = false;
+static bool isSDHC = false;
 
 int sdSizeKb() {
   return sdIsInserted() ? sizeKb : -1;
@@ -81,7 +84,7 @@ static int sd_calculateSizeKb() {
     int blockNr = (cSize)+1 * mult;
     return blockNr * blockLen; // TODO - I think this is wrong
   } else {
-    isSdhc = true;
+    isSDHC = true;
     return (REG16(SDIRSP4) + 1)*512;
   }  
 }
@@ -98,7 +101,9 @@ uint32_t cmd13() {
 }
 
 
-int sdInit() {  
+int sdInit() {
+  isSDHC = false;
+  isMMC = false;
   sdSetClock(INITIAL_SD_SPEED);
   REG16(SDIDatConL) = 0x4000; // make sure all Rx/Tx is halted before we go any further
   REG16(SDICON) = SDICON_BYT_ORDER | BIT(1) | SDICON_ENCLK(1);
@@ -119,19 +124,37 @@ int sdInit() {
   }
 
   if(sd_cmd(8, 0x000001AA, true, false, false)) {
-    uart_printf("CMD8 failed\r\n");
+    // could be MMC
+
+    while(!sd_cmd(1, 0xffc000, true, false, true)) {
+      if(r1() & 0x80000000) {
+	isMMC = true;
+	goto IS_READY;
+      }
+    }
+    
+    uart_printf("CMD8 failed\r\n");    
     return 2;
+  }
+
+  if(r1() & ILLEGAL_COMMAND) {
+    // SD 1.x
+    uart_printf("SD 1.x\n");
   }
       
   if(sd_waitReady()) {
     uart_printf("SD card never became ready\r\n");
     return 3;
   }
-  
+
+ IS_READY:
   while(sd_cmd(2, 0, true, true, false));
   while(sd_cmd(3, 0, true, false, false));
 
-  rca = REG16(SDIRSP1);
+  if(isMMC)
+    rca = 0;
+  else
+    rca = REG16(SDIRSP1);
 
   if(sd_cmd(9, (rca << 16), true, true, false)) {
     return 4;
@@ -147,7 +170,7 @@ int sdInit() {
     break;
   }
   }*/
-  sdSetClock(SD_SPEED);
+  sdSetClock(isMMC ? MMC_SPEED : SD_SPEED);
 
   //  cmd13();
   
@@ -155,7 +178,7 @@ int sdInit() {
   if(sd_cmd(7, (rca << 16), true, false, false)) {
     return 5;
   }
-  
+
   return 0;
 }
 
@@ -169,9 +192,8 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
   REG16(SDIDatConH) = 0x000A;
   REG16(SDICON) |= BIT(1); // clear the FIFO before we try to read
   
-  if(sd_cmd(18, startBlock*(isSdhc ? 1 : 512), true, false, false)) {
+  if(sd_cmd(18, startBlock*(isSDHC ? 1 : 512), true, false, false)) {
     if(cmd13()&0x400000) { // sometimes the card seems to get confused and stuck in data mode, reinit if we start getting illegal command responses
-      uart_printf("Reinit\n");
       sdInit();
     }
     if(attempts > 5) {
