@@ -248,6 +248,10 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
   return !sdReadBlocks(sector, numSectors, (uint8_t*) buffer);
 }
 
+bool sd_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
+  return true;
+}
+
 bool sd_ClearStatus() {
   return true;
 }
@@ -264,7 +268,7 @@ const DISC_INTERFACE __io_gp2xsd = {
 	(FN_MEDIUM_STARTUP)&sd_Startup,
 	(FN_MEDIUM_ISINSERTED)&sdIsInserted,
 	(FN_MEDIUM_READSECTORS)&sd_ReadSectors,
-	NULL, // (FN_MEDIUM_WRITESECTORS)&sdio_WriteSectors,
+	(FN_MEDIUM_WRITESECTORS)&sd_WriteSectors,
 	(FN_MEDIUM_CLEARSTATUS)&sd_ClearStatus,
 	(FN_MEDIUM_SHUTDOWN)&sd_Shutdown
 };
