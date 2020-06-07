@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <sys/iosupport.h>
 
-#undef errno
+//#undef errno
 
 void* heap_ptr;
 extern uint32_t __end_of_heap;
@@ -40,3 +40,4 @@ int orcus_nanosleep(const struct timespec *req, struct timespec *rem) {
 void orcus_init_syscalls() {
   __syscalls.nanosleep = &orcus_nanosleep;
 }
+

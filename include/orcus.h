@@ -11,16 +11,15 @@ extern uint32_t __start_of_heap;
 
 // orcus system functions
 extern void gp2xInit();
-extern int orcus_calculate_uart_diviser(int baudRate);
 extern void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD);
 extern void orcus_default_ram_timings();
 extern void orcus_fast_ram_timings();
 
 typedef enum { NONE, ODD, EVEN } Parity;
 extern void uartConfigure(int baudRate, int bitsPerFrame, Parity parity, int stopBits);
-extern char uart_putc(char c, bool isBlocking);
-extern char uart_getc(bool isBlocking);
-extern void uart_printf(const char* format, ...);
+extern char uartPutc(char c, bool isBlocking);
+extern char uartGetc(bool isBlocking);
+extern void uartPrintf(const char* format, ...);
 
 extern void orcus_configure_gpio(bool isF200);
 

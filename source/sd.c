@@ -118,7 +118,7 @@ int sdInit() {
     }
 
     if(i == 0) {
-      uart_printf("CMD0 failed\r\n");
+      uartPrintf("CMD0 failed\r\n");
       return 1;
     }
   }
@@ -133,17 +133,17 @@ int sdInit() {
       }
     }
     
-    uart_printf("CMD8 failed\r\n");    
+    uartPrintf("CMD8 failed\r\n");    
     return 2;
   }
 
   if(r1() & ILLEGAL_COMMAND) {
     // SD 1.x
-    uart_printf("SD 1.x\n");
+    uartPrintf("SD 1.x\n");
   }
       
   if(sd_waitReady()) {
-    uart_printf("SD card never became ready\r\n");
+    uartPrintf("SD card never became ready\r\n");
     return 3;
   }
 
@@ -222,7 +222,7 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
     REG16(SDICON) |= BIT(1);
     
     if(sd_cmd(12, 0, true, false, false)) {
-      uart_printf("Couldn't stop transmission\r\n");
+      uartPrintf("Couldn't stop transmission\r\n");
       return 2;
     }
 

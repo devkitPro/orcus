@@ -3,11 +3,11 @@
 #include <gp2xregs.h>
 #include <orcus.h>
 
-int orcus_calculate_uart_baud(int baudRate) {
+static int orcus_calculate_uart_baud(int baudRate) {
     return ((14745600/(baudRate*16))-1);
 }
 
-int orcus_calculate_uart_diviser(int baudRate) {
+static int orcus_calculate_uart_diviser(int baudRate) {
     const int clkBasis = 18432000;
     return (int) (clkBasis / (baudRate * 16)) - 1;
 }
@@ -26,7 +26,7 @@ void uartConfigure(int baudRate, int bitsPerFrame, Parity parity, int stopBits) 
   REG16(BRD0) = orcus_calculate_uart_baud(baudRate);
 }
 
-char uart_putc(char c, bool isBlocking) {
+char uartPutc(char c, bool isBlocking) {
   if(isBlocking) {
     while(REG16(FSTATUS0)&FSTATUSx_TX_FIFO_FULL);
     return REG8(THB0) = c;
@@ -35,7 +35,7 @@ char uart_putc(char c, bool isBlocking) {
   }
 }
 
-char uart_getc(bool isBlocking) {
+char uartGetc(bool isBlocking) {
   if(isBlocking) {
     while(FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0);
     return REG8(RHB0);
@@ -44,7 +44,7 @@ char uart_getc(bool isBlocking) {
   }
 }
 
-void uart_printf(const char* format, ...) {
+void uartPrintf(const char* format, ...) {
   const int bufferSize = 256;
   char buffer[bufferSize];
   va_list args;
@@ -54,6 +54,6 @@ void uart_printf(const char* format, ...) {
 
   for(int i = 0 ; i < bufferSize ; i++) {
     if(buffer[i] == '\0') return;
-    else uart_putc(buffer[i], true);
+    else uartPutc(buffer[i], true);
   }
 }
