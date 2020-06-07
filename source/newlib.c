@@ -37,38 +37,51 @@ int orcus_nanosleep(const struct timespec *req, struct timespec *rem) {
   return 0;
 }
 
-void orcus_init_syscalls() {
-  __syscalls.nanosleep = &orcus_nanosleep;
-}
-
-_ssize_t _write_r (struct _reent *ptr, int file , const void* buf, size_t nbytes) {
-  char* castBuf = (char*) buf;
-  if ((file != STDOUT_FILENO) && (file != STDERR_FILENO)) {
-    ptr->_errno = EBADF;
-    return -1;
-  }
-
-  for(int i = 0 ; i < nbytes ; i++) {
-    uartPutc(castBuf[i], true);
+static _ssize_t _uart_write_r(struct _reent *r, void *fd, const char *ptr, size_t len) {
+  for(int i = 0 ; i < len ; i++) {
+    uartPutc(ptr[i], true);
   }
         
-  return nbytes;
+  return len;
 }
 
-
-_ssize_t _read_r(struct _reent* ptr, int file, void* buf, size_t len) {
-  char* castBuf = (char*) buf;
-  if(STDIN_FILENO == file) {
-    int  i;
-    for(i = 0 ; i < len ; i++) {
-      castBuf[i] = uartGetc(true);
-      if('\n' == castBuf[i] || '\r' == castBuf[i]) {
-	return i;
-      }
+static _ssize_t _uart_read_r(struct _reent *r, void *fd, char *ptr, size_t len) {
+  int  i;
+  for(i = 0 ; i < len ; i++) {
+    ptr[i] = uartGetc(true);
+    if('\n' == ptr[i] || '\r' == ptr[i]) {
+      return i;
     }
-    return i;
-  } else {
-    ptr->_errno = EBADF;
-    return -1;
   }
+  return i;
 }
+
+static const devoptab_t dotab_stdout = {
+        "uart",
+        0,
+        NULL,
+        NULL,
+        _uart_write_r,
+        NULL,
+        NULL,
+        NULL
+};
+
+static const devoptab_t dotab_stdin = {
+        "uart",
+        0,
+        NULL,
+        NULL,
+	NULL,
+        _uart_read_r,
+        NULL,
+        NULL
+};
+
+void orcus_init_syscalls() {
+  __syscalls.nanosleep = &orcus_nanosleep;
+  devoptab_list[STD_OUT] = &dotab_stdout;
+  devoptab_list[STD_ERR] = &dotab_stdout;
+  devoptab_list[STD_IN] = &dotab_stdin;
+}
+
