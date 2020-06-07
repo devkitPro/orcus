@@ -7,7 +7,6 @@
 #include <sys/iosupport.h>
 
 #undef errno
-extern int errno;
 
 void* heap_ptr;
 extern uint32_t __end_of_heap;
@@ -49,9 +48,27 @@ _ssize_t _write_r (struct _reent *ptr, int file , const void* buf, size_t nbytes
     return -1;
   }
 
-  for(int i = 0; i < nbytes; i++) {
+  for(int i = 0 ; i < nbytes ; i++) {
     uartPutc(castBuf[i], true);
   }
         
   return nbytes;
+}
+
+
+_ssize_t _read_r(struct _reent* ptr, int file, void* buf, size_t len) {
+  char* castBuf = (char*) buf;
+  if(STDIN_FILENO == file) {
+    int  i;
+    for(i = 0 ; i < len ; i++) {
+      castBuf[i] = uartGetc(true);
+      if('\n' == castBuf[i] || '\r' == castBuf[i]) {
+	return i;
+      }
+    }
+    return i;
+  } else {
+    ptr->_errno = EBADF;
+    return -1;
+  }
 }

@@ -12,6 +12,8 @@ static int orcus_calculate_uart_diviser(int baudRate) {
     return (int) (clkBasis / (baudRate * 16)) - 1;
 }
 
+static bool uartEcho = false;
+
 void uartConfigure(int baudRate, int bitsPerFrame, Parity parity, int stopBits) {
   REG16(URT0CSETREG) = URT0CSETREG_UART0(URTnCSETREG_CLKSRC(APLL_CLK) | URTnCSETREG_CLKDIV(orcus_calculate_uart_diviser(baudRate)));
   REG16(LCON0) = LCONx_SIR_MODE(LCONx_SIR_MODE_NORMAL)
@@ -35,12 +37,26 @@ char uartPutc(char c, bool isBlocking) {
   }
 }
 
-char uartGetc(bool isBlocking) {
+int uartGetc(bool isBlocking) {
+  char out;
   if(isBlocking) {
     while(FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0);
-    return REG8(RHB0);
+    out = REG8(RHB0);
+    if(uartEcho) {
+      uartPutc(out, true);
+    }
+    return out;
   } else {
-    return FSTATUSx_RX_FIFO_COUNT(FSTATUS0) == 0 ? -1 : REG8(RHB0);
+    int bytesAvailable = FSTATUSx_RX_FIFO_COUNT(FSTATUS0);
+    if(FSTATUSx_RX_FIFO_COUNT(FSTATUS0) != 0) {
+      out = REG8(RHB0);
+      if(uartEcho) {
+	uartPutc(out, true);
+      }
+      return out;      
+    } else {
+      return EOF;
+    }
   }
 }
 
@@ -56,4 +72,8 @@ void uartPrintf(const char* format, ...) {
     if(buffer[i] == '\0') return;
     else uartPutc(buffer[i], true);
   }
+}
+
+void uartSetEcho(bool value) {
+  uartEcho = value;
 }

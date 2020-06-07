@@ -18,8 +18,9 @@ extern void orcus_fast_ram_timings();
 typedef enum { NONE, ODD, EVEN } Parity;
 extern void uartConfigure(int baudRate, int bitsPerFrame, Parity parity, int stopBits);
 extern char uartPutc(char c, bool isBlocking);
-extern char uartGetc(bool isBlocking);
+extern int uartGetc(bool isBlocking);
 extern void uartPrintf(const char* format, ...);
+extern void uartSetEcho(bool value);
 
 extern void orcus_configure_gpio(bool isF200);
 
