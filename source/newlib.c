@@ -6,13 +6,14 @@
 #include <sys/time.h>
 #include <sys/iosupport.h>
 
-//#undef errno
+#undef errno
+extern int errno;
 
 void* heap_ptr;
 extern uint32_t __end_of_heap;
 void* heap_end_ptr = (void*)&__end_of_heap;
 
-void *_sbrk_r(struct _reent *ptr, ptrdiff_t incr) {
+void* _sbrk_r(struct _reent *ptr, ptrdiff_t incr) {
   if ((heap_ptr + incr) < heap_end_ptr) {
     void *base = heap_ptr;
     heap_ptr += incr;
@@ -41,3 +42,16 @@ void orcus_init_syscalls() {
   __syscalls.nanosleep = &orcus_nanosleep;
 }
 
+_ssize_t _write_r (struct _reent *ptr, int file , const void* buf, size_t nbytes) {
+  char* castBuf = (char*) buf;
+  if ((file != STDOUT_FILENO) && (file != STDERR_FILENO)) {
+    ptr->_errno = EBADF;
+    return -1;
+  }
+
+  for(int i = 0; i < nbytes; i++) {
+    uartPutc(castBuf[i], true);
+  }
+        
+  return nbytes;
+}
