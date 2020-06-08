@@ -66,6 +66,13 @@ void orcus_configure_gpio(bool isF200) {
     | (OUT << 2)
     | (OUT << 0);
 
+  REG16(GPIOGALTFNLOW) = REG16(GPIOGALTFNLOW)
+    | (OUT << 10)
+    | (OUT << 8)
+    | (OUT << 6)
+    | (OUT << 4)
+    | (OUT << 2);
+
   if(isF200) {
     REG16(GPIOFALTFNLOW) = (ALTFN1 << 14)
       | (OUT << 12)

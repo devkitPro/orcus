@@ -118,7 +118,6 @@ int sdInit() {
     }
 
     if(i == 0) {
-      uartPrintf("CMD0 failed\r\n");
       return 1;
     }
   }
@@ -132,18 +131,16 @@ int sdInit() {
 	goto IS_READY;
       }
     }
-    
-    uartPrintf("CMD8 failed\r\n");    
-    return 2;
-  }
 
-  if(r1() & ILLEGAL_COMMAND) {
-    // SD 1.x
-    uartPrintf("SD 1.x\n");
+    if(!sd_waitReady()) {
+      // this is an SD1.x card
+      goto IS_READY;
+    }
+    
+    return 2;
   }
       
   if(sd_waitReady()) {
-    uartPrintf("SD card never became ready\r\n");
     return 3;
   }
 
@@ -161,19 +158,8 @@ int sdInit() {
   }
   sizeKb = sd_calculateSizeKb();
 
-  // set bus to full width SD
-  /*  while(true) {
-  if(sd_cmd(55, 0, true, false, false)) {
-    continue;
-  }
-  if(!sd_cmd(6, 1, true, false, false)) {
-    break;
-  }
-  }*/
   sdSetClock(isMMC ? MMC_SPEED : SD_SPEED);
 
-  //  cmd13();
-  
   // select card
   if(sd_cmd(7, (rca << 16), true, false, false)) {
     return 5;
@@ -222,7 +208,6 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
     REG16(SDICON) |= BIT(1);
     
     if(sd_cmd(12, 0, true, false, false)) {
-      uartPrintf("Couldn't stop transmission\r\n");
       return 2;
     }
 
