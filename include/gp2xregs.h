@@ -423,4 +423,10 @@ extern r32 _fiq;
 #define NFCMD 0x0010
 #define NFADDR 0x0018
 
+#define DUAL920DAT0 0x3B00
+#define DUAL940DAT0 0x3B20
+#define DUALINT920 0x3B40
+#define DUALINT940 0x3B42
+#define DUALCTRL940 0x3B48
+
 #endif

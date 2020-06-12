@@ -47,7 +47,6 @@ int uartGetc(bool isBlocking) {
     }
     return out;
   } else {
-    int bytesAvailable = FSTATUSx_RX_FIFO_COUNT(FSTATUS0);
     if(FSTATUSx_RX_FIFO_COUNT(FSTATUS0) != 0) {
       out = REG8(RHB0);
       if(uartEcho) {
