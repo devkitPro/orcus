@@ -154,10 +154,13 @@ extern void nandRead(uint32_t startAdddr, int numberOfBlocks, void* dest);
 
 extern void enableICache();
 
-extern void arm940Init(uint8_t memoryBank);
+extern int arm940Init(int memoryBank);
 extern bool arm940Running();
 extern void arm940Halt();
 extern void arm940Run();
+extern void arm940ClockOn();
+extern void arm940ClockOff();
+extern bool arm940HasClock();
 extern volatile uint16_t* arm940Data;
 extern volatile uint16_t* arm920Data;
 

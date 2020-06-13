@@ -23,13 +23,16 @@ void gp2xInit() {
   setClock(((A_MDIV << 8) | (A_PDIV << 2) | A_SDIV), APLLSETVREG, APLLVSETREG, CLKCHGSTREG_APLLCHGST);
   REG16(CLKMGRREG) = CLKMGRREG_APLL_USE | CLKMGRREG_UPLL_USE;
 
-  enableICache();  
+  enableICache();
   
   // configure syscalls
   orcus_init_syscalls();
 
   // disable clocks for unwanted peripherals
   orcus_configure_peripherals();
+
+  arm940Halt();
+  //arm940ClockOff();
 
   // set up UART0 to 115200/8N1
   uartConfigure(115200, 8, NONE, 1);

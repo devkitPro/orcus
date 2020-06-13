@@ -13,6 +13,16 @@ LIBORCUS	:=	$(DEVKITPRO)/liborcus
 	@echo extracting raw binary
 	@$(OBJCOPY) -O binary $< $@
 
+%.940.elf:
+	@echo linking 940 binary
+	@$(LD)  $(LDFLAGS) -Xlinker --defsym=__arm940_bank=$(ARM940_MEMORY_BANK) -specs=gp2x_940.specs $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+
+ifeq ($(strip $(ARM940_MEMORY_BANK)),)
 %.elf:
 	@echo linking binary
 	@$(LD)  $(LDFLAGS) -specs=gp2x.specs $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+else
+%.elf:
+	@echo linking binary
+	@$(LD)  $(LDFLAGS) -Xlinker --defsym=__arm940_bank=$(ARM940_MEMORY_BANK) -specs=gp2x.specs $(OFILES) $(LIBPATHS) $(LIBS) -o $@
+endif
