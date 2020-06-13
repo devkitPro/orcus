@@ -15,7 +15,7 @@ void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t stat
   for(int i = 0; (i<10000000) && (REG16(readVReg) != value) ; i++);
 }
 
-void gp2xInit() {
+static void arm920_gp2xInit() {
   // set up clock sources - default settings when system boots, set here in case something
   // else has messed around with them
   setClock(((F_MDIV << 8) | (F_PDIV << 2) | F_SDIV), FPLLSETVREG, FPLLVSETREG, CLKCHGSTREG_FPLLCHGST);
@@ -32,7 +32,7 @@ void gp2xInit() {
   orcus_configure_peripherals();
 
   arm940Halt();
-  //arm940ClockOff();
+  arm940ClockOff();
 
   // set up UART0 to 115200/8N1
   uartConfigure(115200, 8, NONE, 1);
@@ -56,6 +56,21 @@ void gp2xInit() {
 
   extern void* heap_ptr;
   heap_ptr = (void*)&__start_of_heap;
+}
+
+static void arm940_gp2xInit() {
+  orcus_init_syscalls();
+  
+  extern void* heap_ptr;
+  heap_ptr = (void*)&__start_of_heap;
+}
+
+void gp2xInit() {
+  if(arm940IsThis()) {
+    arm940_gp2xInit();
+  } else {
+    arm920_gp2xInit();
+  }
 }
 
 void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD) {
