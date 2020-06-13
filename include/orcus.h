@@ -162,7 +162,8 @@ extern void arm940ClockOn();
 extern void arm940ClockOff();
 extern bool arm940HasClock();
 extern bool arm940IsThis();
-extern void* arm9x0ImportPointer(uint32_t addr);
+extern void* importPointer(uint32_t addr);
+extern uint32_t exportPointer(void* ptr);
 extern volatile uint16_t* arm940Data;
 extern volatile uint16_t* arm920Data;
 

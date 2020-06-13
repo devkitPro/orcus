@@ -51,11 +51,21 @@ bool arm940IsThis() {
   return ((int)&__is_arm940) == 1;
 }
 
-void* arm9x0ImportPointer(uint32_t addr) {
+void* importPointer(uint32_t addr) {
   int bank = ((int)&__arm940_bank);
   if(arm940IsThis()) {
     return (void*) (addr - (bank * 0x1000000));
   } else {
     return (void*) (addr + (bank * 0x1000000));
+  }
+}
+
+uint32_t exportPointer(void* ptr) {
+  int bank = ((int)&__arm940_bank);
+  uint32_t ptrAddr = (uint32_t) ptr;
+  if(arm940IsThis()) {
+    return (uint32_t) (ptrAddr + (bank * 0x1000000));
+  } else {
+    return (uint32_t) (ptrAddr - (bank * 0x1000000));
   }
 }
