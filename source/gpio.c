@@ -3,7 +3,7 @@
 #include <sys/unistd.h>
 #include <time.h>
 
-void orcus_configure_gpio(bool isF200) {
+bool orcus_configure_gpio() {
   // lcd
   REG16(GPIOBALTFNHI) = (ALTFN1 << 14)
     | (ALTFN1 << 12)
@@ -33,6 +33,43 @@ void orcus_configure_gpio(bool isF200) {
 
   REG16(GPIOBPUENB) = REG16(GPIOBPUENB) & ~0xF0;
 
+  // set up memc so we can detect net2272 in F100
+  REG16(GPIOGALTFNLOW) = REG16(GPIOGALTFNLOW) // 0xaaaa
+    | (ALTFN1 << 10)
+    | (ALTFN1 << 8)
+    | (ALTFN1 << 6)
+    | (ALTFN1 << 4)
+    | (ALTFN1 << 2);
+
+  REG16(GPIOEALTFNLOW) = (ALTFN1 << 14) // 0xaaaa
+    | (ALTFN1 << 12)
+    | (ALTFN1 << 10)
+    | (ALTFN1 << 8)
+    | (ALTFN1 << 6)
+    | (ALTFN1 << 4)
+    | (ALTFN1 << 2)
+    | ALTFN1;
+  REG16(GPIOEALTFNHI) = (ALTFN1 << 14) // 0xaaaa
+    | (ALTFN1 << 12)
+    | (ALTFN1 << 10)
+    | (ALTFN1 << 8)
+    | (ALTFN1 << 6)
+    | (ALTFN1 << 4)
+    | (ALTFN1 << 2)
+    | ALTFN1;
+  REG16(GPIOIALTFNHI) = (REG16(GPIOIALTFNHI) & ~(0x3 << 4)) | (ALTFN1 << 4); //0xaaaa (mine) vs 8aaa
+
+  REG16(GPIOJALTFNHI) = (REG16(GPIOJALTFNHI) & ~(0x3 << 6)) | (ALTFN1 << 6); // 0x16aa (mine) vs 0x06aa
+  REG16(GPIOJALTFNHI) = (REG16(GPIOJALTFNHI) & ~(0x3 << 8)) | (ALTFN1 << 8);
+
+  REG16(GPIOKALTFNLOW) = 0x0808;// (REG16(GPIOKALTFNLOW) & ~(0x3 << 2)) | (ALTFN1 << 2); // 0x8
+  //  REG16(GPIOKALTFNLOW) = (REG16(GPIOKALTFNLOW) & ~(0x3 << 10)) | (ALTFN1 << 10);
+
+  REG16(GPIODALTFNLOW) = (REG16(GPIODALTFNLOW) & ~(0x3 << 8)) | (OUT << 8); // 0x29aa
+  // end net2272
+
+  bool isF200 = gp2xIsF200();
+  
   // set GPIO pins for LCD
   if(isF200) {
     REG16(GPIOLALTFNHI) = (OUT << 6)
@@ -66,13 +103,6 @@ void orcus_configure_gpio(bool isF200) {
     | (OUT << 2)
     | (OUT << 0);
 
-  REG16(GPIOGALTFNLOW) = REG16(GPIOGALTFNLOW)
-    | (OUT << 10)
-    | (OUT << 8)
-    | (OUT << 6)
-    | (OUT << 4)
-    | (OUT << 2);
-
   if(isF200) {
     REG16(GPIOFALTFNLOW) = (ALTFN1 << 14)
       | (OUT << 12)
@@ -94,4 +124,6 @@ void orcus_configure_gpio(bool isF200) {
     REG16(GPIOBOUT) |= LCD_RESET;
     REG16(GPIOHOUT) |= BACKLIGHT_F100;
   }
+
+  return isF200;
 }

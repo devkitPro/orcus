@@ -10,4 +10,9 @@ Orcus:
 	* NAND - erase and write
 	* F200 touchscreen
 	* Set CPU clock
+	* MMU and PU functions
 
+readelf -s framebuffer.elf | grep "__params_addr" | grep -Po ': \K[0-9A-Fa-f]+ ' | xargs printf "0x%s"
+
+
+0x88000000 - 0x00 on an F100, 0xFF on an F200

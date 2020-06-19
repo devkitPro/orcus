@@ -43,10 +43,7 @@ static void arm920_gp2xInit() {
   // enable timer
   REG16(TCONTROL) = 0x1;
 
-  // check if this is an f200
-  bool isF200 = gp2xIsF200();
-
-  orcus_configure_gpio(isF200);
+  bool isF200 = orcus_configure_gpio();
   orcus_configure_display(isF200);
 
   // set up NAND timings
@@ -211,5 +208,20 @@ uint32_t btnState() {
 }
 
 bool gp2xIsF200() {
-  return true;
+  REG16(MEMTIMEW0) = REG16(MEMTIMEW0) & ~(3 << 4);
+  REG16(MEMTIMEW1) = REG16(MEMTIMEW1) & ~(3 << 4);
+  REG16(MEMTIMEW2) = REG16(MEMTIMEW2) & ~(3 << 2);
+  REG16(MEMTIMEW4) = (REG16(MEMTIMEW4) & ~(0xf << 8))
+    | (2 << 8);
+
+  REG16(GPIODOUT) &= ~BIT(4);
+  
+  timerSet(1);
+  while(timerGet() < 74075); // sleep 10ms
+  REG16(GPIODOUT) |= ~BIT(4);
+  timerSet(1);
+  while(timerGet() < 2222221); // sleep 300ms
+
+  uint8_t* memLoc = (uint8_t*) 0x88000000;
+  return (*memLoc) == 0xFF;
 }

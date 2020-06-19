@@ -22,7 +22,7 @@ extern int uartGetc(bool isBlocking);
 extern void uartPrintf(const char* format, ...);
 extern void uartSetEcho(bool value);
 
-extern void orcus_configure_gpio(bool isF200);
+extern bool orcus_configure_gpio();
 
 /**
  * Delay for <loops> ticks. A tick is of arbitrary length.

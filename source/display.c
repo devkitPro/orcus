@@ -27,7 +27,6 @@ void orcus_configure_display(bool isF200) {
   REG16(DPC_CNTL) |= ENB(1);
 
   if(isF200) {
-    //    REG16(GPIOLOUT) &= ~(1 << 11); // backlight off
     REG16(GPIOFOUT) |= 0xC;
 
     orcus_delay(20);
