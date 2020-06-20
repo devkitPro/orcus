@@ -41,8 +41,8 @@ void nandErase(uint32_t startAddr, int numberOfBlocks) {
   }
 }
 
-void nandWrite(uint32_t startAddr, int numberOfBlocks, void* dest) {
-  uint16_t* d = (uint16_t*) dest;
+void nandWrite(uint32_t startAddr, int numberOfBlocks, void* src) {
+  uint16_t* s = (uint16_t*) src;
   uint32_t addr = startAddr;
   REG16(MEMNANDCTRLW) = 0x8080;
   for(int i = numberOfBlocks ; i-- ; ) {
@@ -54,7 +54,7 @@ void nandWrite(uint32_t startAddr, int numberOfBlocks, void* dest) {
 
     
     for(int j = 0 ; j < NAND_BLOCK_SIZE ; j+=2 ) {
-      NANDREG16(NFDATA) = *(d++);
+      NANDREG16(NFDATA) = *(s++);
     }
     NANDREG8(NFCMD) = 0x10;
     while(!(REG16(MEMNANDCTRLW) & 0x8000));

@@ -152,7 +152,7 @@ extern unsigned int timerNsSince(uint32_t lastTick, uint32_t* storeCurrent);
 
 extern void nandRead(uint32_t startAdddr, int numberOfBlocks, void* dest);
 extern void nandErase(uint32_t startAdddr, int numberOfBlocks);
-extern void nandWrite(uint32_t startAddr, int numberOfBlocks, void* dest);
+extern void nandWrite(uint32_t startAddr, int numberOfBlocks, void* src);
 
 extern void enableICache();
 
