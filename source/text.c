@@ -31,13 +31,28 @@ void rgbPutc(uint16_t* fb, int x, int y, uint16_t colour, char c) {
   }
 }
 
-void rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, const char* format, ...) {
+void rgbPutcBg(uint16_t* fb, int x, int y, uint16_t colour, uint16_t bgColour, char c) {
+  if(c < ' ' || c > '~') {
+    return;
+  }
+  
+  for(int j = 0 ; j < _charHeight ; j++) {
+    for(int i = 0 ; i < _charWidth ; i++) {
+      uint16_t cPx = _font[j*(CHARS*_charWidth)+i+((c-' ')*_charWidth)];
+      if((x+i) < 320) {
+	fb[x+i+((y+j)*320)] = cPx != MAGENTA ? colour : bgColour;
+      }
+    }
+  }
+}
+
+static void _rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, bool applyBg, uint16_t bgColour, const char* format, ...) {
   const int bufferSize = 256;
   char buffer[bufferSize];
   va_list args;
   va_start(args, format);
   vsprintf(buffer, format, args);
-  va_end (args);
+  va_end(args);
   int currentX = x;
   int currentY = y;
 
@@ -48,8 +63,28 @@ void rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, const char* format, 
       currentY += _charHeight;
       currentX = x;
     } else {
-      rgbPutc(fb, currentX, currentY, colour, buffer[i]);
+      if(applyBg) {
+	rgbPutcBg(fb, currentX, currentY, colour, bgColour, buffer[i]);
+      } else {
+	rgbPutc(fb, currentX, currentY, colour, buffer[i]);
+      }
       currentX += _charWidth;
     }
   }
 }
+
+
+void rgbPrintfBg(uint16_t* fb, int x, int y, uint16_t colour, uint16_t bgColour, const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  _rgbPrintf(fb, x, y, colour, true, bgColour, format, args);
+  va_end(args);
+}
+
+void rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  _rgbPrintf(fb, x, y, colour, false, 0x0, format, args);  
+  va_end(args);
+}
+

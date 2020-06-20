@@ -3,7 +3,6 @@
 +------+
 
 Orcus:
-	* F200 detection
 	* LCD functions - blitter, yuv
 	* Audio
 	* SD card - write support
@@ -14,7 +13,6 @@ Orcus:
 
 readelf -s framebuffer.elf | grep "__params_addr" | grep -Po ': \K[0-9A-Fa-f]+ ' | xargs printf "0x%s"
 
-remove timer alteration from sd.c, do timeout more like timerSleepNs to avoid interfering with user code making use of the timer
 remove orcus_delay entirely
 
 0x88000000 - 0x00 on an F100, 0xFF on an F200
