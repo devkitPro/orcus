@@ -53,8 +53,6 @@ static void _rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, bool applyBg
   int currentX = x;
   int currentY = y;
 
-  uartPrintf("buffer is: %s\n", buffer);
-
   for(int i = 0 ; i < bufferSize ; i++) {
     if(buffer[i] == '\0') return;
     else if(currentX >= 320) { continue; }
