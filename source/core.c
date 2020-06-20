@@ -42,7 +42,8 @@ static void arm920_gp2xInit() {
 
   // enable timer
   REG16(TCONTROL) = 0x1;
-
+  timerSet(1);
+  
   bool isF200 = orcus_configure_gpio();
   orcus_configure_display(isF200);
 
@@ -88,6 +89,15 @@ uint32_t timerSet(uint32_t count) {
   while(REG32(TCOUNT) == currentCount);
   REG32(TCOUNT) = (count == 0 ? 1 : count); // NOTE - there seems to be a bug in the silicon prevent reset to 0
   return currentCount;
+}
+
+void timerSleepNs(uint32_t ns) {
+  uint32_t start = timerGet();
+  uint32_t end = start + (ns / 135);
+  if(end < start) {
+    while(timerGet() >= start); // wait for overflow
+  }
+  while(timerGet() < end);
 }
 
 void orcus_delay(int loops) {

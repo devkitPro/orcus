@@ -133,12 +133,6 @@ extern void lcdWaitNextHSync();
 
 extern uint32_t btnState();
 
-typedef struct {
-  bool isInserted;
-  int sizeKb;
-  uint16_t rca;
-} SdInfo;
-
 extern int sdInit();
 extern int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest);
 extern bool sdIsInserted();
@@ -149,6 +143,8 @@ extern bool gp2xIsF200();
 // timer increments once every 0.135uS and overflows at 0xFFFFFFFF then carries on counting
 extern uint32_t timerGet();
 extern uint32_t timerSet(uint32_t count);
+extern void timerSleepNs(uint32_t ns);
+#define TIMER_NS_PER_TICK 135
 
 extern void nandRead(uint32_t startAdddr, int numberOfBlocks, void* dest);
 
