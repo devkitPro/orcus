@@ -24,10 +24,6 @@ void sdSetClock(int hz) {
   usleep(20000);
 }
 
-bool timeout() {
-  return REG32(TCOUNT) > 250000;
-}
-
 static int sd_cmd(uint8_t command, uint32_t arg, bool awaitResponse, bool isLongResponse, bool ignoreCrc) {
   REG16(SDICmdSta) = 0x0F00; // clear flags
 
@@ -194,9 +190,9 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
 
     for(int block = 0 ; block < numberOfBlocks ; block++) {
       for(int byte = 0 ; byte < 512 ; byte++) { // TODO - handle different block sizes
-	timerSet(0);
+	uint32_t currentTimer = timerGet();
 	while((REG16(SDIFSTA)&0x7F) == 0) {
-	  if(timeout()) {
+	  if(timerNsSince(currentTimer, NULL) > 33750000) {
 	    goto CMD18;
 	  }
 	}

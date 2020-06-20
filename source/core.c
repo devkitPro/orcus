@@ -92,7 +92,7 @@ uint32_t timerSet(uint32_t count) {
   return currentCount;
 }
 
-void timerSleepNs(uint32_t ns) {
+void timerSleepNs(unsigned int ns) {
   uint32_t start = timerGet();
   uint32_t end = start + (ns / 135);
   if(end < start) {
@@ -252,12 +252,9 @@ bool gp2xIsF200() {
     | (2 << 8);
 
   REG16(GPIODOUT) &= ~BIT(4);
-  
-  timerSet(1);
-  while(timerGet() < 74075); // sleep 10ms
+  timerSleepNs(10000000); // sleep 10ms
   REG16(GPIODOUT) |= ~BIT(4);
-  timerSet(1);
-  while(timerGet() < 2222221); // sleep 300ms
+  timerSleepNs(300000000); // sleep 300ms
 
   uint8_t* memLoc = (uint8_t*) 0x88000000;
   return (*memLoc) == 0xFF;

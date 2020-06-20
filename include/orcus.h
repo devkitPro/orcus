@@ -145,7 +145,7 @@ extern bool gp2xIsF200();
 #define TIMER_NS_PER_TICK 135
 extern uint32_t timerGet();
 extern uint32_t timerSet(uint32_t count);
-extern void timerSleepNs(uint32_t ns);
+extern void timerSleepNs(unsigned int ns);
 extern unsigned int timerNsSince(uint32_t lastTick, uint32_t* storeCurrent);
 
 extern void nandRead(uint32_t startAdddr, int numberOfBlocks, void* dest);
