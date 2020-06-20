@@ -46,15 +46,14 @@ void rgbPutcBg(uint16_t* fb, int x, int y, uint16_t colour, uint16_t bgColour, c
   }
 }
 
-static void _rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, bool applyBg, uint16_t bgColour, const char* format, ...) {
+static void _rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, bool applyBg, uint16_t bgColour, const char* format, va_list args) {
   const int bufferSize = 256;
   char buffer[bufferSize];
-  va_list args;
-  va_start(args, format);
   vsprintf(buffer, format, args);
-  va_end(args);
   int currentX = x;
   int currentY = y;
+
+  uartPrintf("buffer is: %s\n", buffer);
 
   for(int i = 0 ; i < bufferSize ; i++) {
     if(buffer[i] == '\0') return;
@@ -84,7 +83,7 @@ void rgbPrintfBg(uint16_t* fb, int x, int y, uint16_t colour, uint16_t bgColour,
 void rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, const char* format, ...) {
   va_list args;
   va_start(args, format);
-  _rgbPrintf(fb, x, y, colour, false, 0x0, format, args);  
+  _rgbPrintf(fb, x, y, colour, false, 0x0, format, args);
   va_end(args);
 }
 
