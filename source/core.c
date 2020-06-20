@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <gp2xregs.h>
 #include <orcus.h>
+#include <unistd.h>
 
 extern void orcus_configure_display(bool isF200);
 extern void orcus_init_syscalls();
@@ -98,6 +99,18 @@ void timerSleepNs(uint32_t ns) {
     while(timerGet() >= start); // wait for overflow
   }
   while(timerGet() < end);
+}
+
+unsigned int timerNsSince(uint32_t lastTick, uint32_t* storeCurrent) {
+  uint32_t currentTick = timerGet();
+  int ticksSince = (currentTick < lastTick) ? ((0xFFFFFFFF - lastTick) + currentTick)  : (currentTick - lastTick);
+  int nsSince = ticksSince * TIMER_NS_PER_TICK;
+
+  if(storeCurrent != NULL) {
+    *storeCurrent = currentTick;
+  }
+
+  return nsSince;
 }
 
 void orcus_delay(int loops) {
@@ -215,6 +228,20 @@ uint32_t btnState() {
     | (d & (1<<11) ? STICK : 0)
     | (d & (1<<6) ? VOL_DOWN : 0)
     | (d & (1<<7) ? VOL_UP : 0);    
+}
+
+uint32_t btnStateDebounced() {
+  uint32_t currentButtonState = btnState();
+  uint32_t nextButtonState;
+  while(1) {
+    usleep(5000);
+    nextButtonState = btnState();
+    if(nextButtonState == currentButtonState) {
+      break;
+    }
+    currentButtonState = nextButtonState;
+  }
+  return currentButtonState;
 }
 
 bool gp2xIsF200() {
