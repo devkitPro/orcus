@@ -29,9 +29,9 @@ void nandErase(uint32_t startAddr, int numberOfBlocks) {
   for(int i = numberOfBlocks ; i-- ; ) {
     NANDREG8(NFCMD) = 0x60;
     NANDREG8(NFADDR) = (addr&0xFF);
-    NANDREG8(NFADDR) = ((addr>>9)&0xFF);
-    NANDREG8(NFADDR) = ((addr>>17)&0xFF);
-    NANDREG8(NFADDR) = ((addr>>25)&0xFF);
+    NANDREG8(NFADDR) = ((addr>>8)&0xFF);
+    NANDREG8(NFADDR) = ((addr>>16)&0xFF);
+    NANDREG8(NFADDR) = ((addr>>24)&0xFF);
     NANDREG8(NFCMD) = 0xD0;
     
     while(!(REG16(MEMNANDCTRLW) & 0x8000));
