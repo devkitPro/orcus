@@ -7,11 +7,13 @@ LIBORCUS	:=	$(DEVKITPRO)/liborcus
 #---------------------------------------------------------------------------------
 %.o2x: %.bin
 	@echo building o2x executable
-	@mko2x --name "$(TITLE)" --out $@ --section $< 0x0 $(MKO2X_PARAMS)
+	mko2x --name "$(TITLE)" --out $@ --section $< 0x0 --params ${PARAMS_ADDR} ${PARAMS_LENGTH} $(MKO2X_PARAMS)
 
 %.bin: %.elf
 	@echo extracting raw binary
 	@$(OBJCOPY) -O binary $< $@
+	@$(eval PARAMS_ADDR := $(shell readelf -s $< | grep "__params_addr" | grep -Po ': \K[0-9A-Fa-f]+ ' | xargs printf "0x%s"))
+	@$(eval PARAMS_LENGTH := $(shell readelf -s $< | grep "__params_length" | grep -Po ': \K[0-9A-Fa-f]+ ' | xargs printf "0x%s"))
 
 %.940.elf:
 	@echo linking 940 binary
