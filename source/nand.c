@@ -51,8 +51,6 @@ void nandWrite(uint32_t startAddr, int numberOfBlocks, void* src) {
     NANDREG8(NFADDR) = ((addr>>9)&0xFF);
     NANDREG8(NFADDR) = ((addr>>17)&0xFF);
     NANDREG8(NFADDR) = ((addr>>25)&0xFF);
-
-    
     for(int j = 0 ; j < NAND_BLOCK_SIZE ; j+=2 ) {
       NANDREG16(NFDATA) = *(s++);
     }
