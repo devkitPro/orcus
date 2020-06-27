@@ -425,7 +425,6 @@ extern r32 _fiq;
 #define TCOUNT 0x0A00
 #define TCONTROL 0x0A14
 
-#define NAND_BLOCK_SIZE 512
 #define MEMNANDCTRLW 0x3A3A
 #define MEMNANDTIMEW 0x3A3C
 
