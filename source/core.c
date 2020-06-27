@@ -43,7 +43,7 @@ static void arm920_gp2xInit() {
   uartConfigure(115200, 8, NONE, 1);
 
   // set up memory timings
-  orcus_default_ram_timings();
+  gp2xSetDefaultRamTimings();
 
   // enable timer
   REG16(TCONTROL) = 0x1;
