@@ -60,6 +60,7 @@ $(BUILD):
 
 docs:
 	doxygen orcus.dox
+	@tar -cvjf orcus-$(VERSION)-docs.tar.bz2 docs
 
 clean:
 	@echo clean ...
