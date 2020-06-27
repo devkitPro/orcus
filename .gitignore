@@ -57,3 +57,5 @@ dkms.conf
 .#*
 *.tar.bz2
 build
+*.log
+docs/

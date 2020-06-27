@@ -1,6 +1,8 @@
 #include <gp2xregs.h>
 #include <orcus.h>
 
+extern void orcus_delay(int loops);
+
 // NOTE! Using lots of magic numbers here which were just lifted straight from an F100 via JTAG while running official GPH firmware, after trying to figure out the values based on the data sheet took too long. These may be different for an F200, to confirm
 void orcus_configure_display(bool isF200) {
   REG16(DISPCSETREG) = 0x5E00;//0x6000; // DISPCLKSRC(FPLL_CLK) | DISPCLKDIV(32) | DISPCLKPOL(0);

@@ -9,6 +9,10 @@
 extern void orcus_configure_display(bool isF200);
 extern void orcus_init_syscalls();
 extern void orcus_configure_peripherals();
+extern bool orcus_configure_gpio();
+
+// memory layout from linker and init function
+extern uint32_t __start_of_heap;
 
 void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t statusBit) {
   REG16(setVReg) = value;
@@ -72,13 +76,13 @@ void gp2xInit() {
   }
 }
 
-void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD) {
+void gp2xSetRamTimings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD) {
   REG16(MEMTIMEX0) = ((tMRD & 0xF) << 12) | ((tRFC & 0xF) << 8) | ((tRP & 0xF) << 4) | (tRCD & 0xF);
   REG16(MEMTIMEX1) = ((tRC & 0xF) << 8) | ((tRAS & 0xF) << 4) | (tWR & 0xF);  
 }
 
-void orcus_default_ram_timings() { orcus_set_ram_timings(7, 15, 2, 7, 7, 7, 7); }
-void orcus_fast_ram_timings() { orcus_set_ram_timings(5, 3, 0, 0, 0, 1, 1); }
+void gp2xSetDefaultRamTimings() { gp2xSetRamTimings(7, 15, 2, 7, 7, 7, 7); }
+void gp2xSetFastRamTimings() { gp2xSetRamTimings(5, 3, 0, 0, 0, 1, 1); }
 
 uint32_t timerGet() {
   return REG32(TCOUNT);
@@ -113,6 +117,9 @@ unsigned int timerNsSince(uint32_t lastTick, uint32_t* storeCurrent) {
   return nsSince;
 }
 
+/**
+ * Delay for <loops> ticks. A tick is of arbitrary length.
+ */
 void orcus_delay(int loops) {
   volatile int i = loops;
   for(;i != 0;i--);

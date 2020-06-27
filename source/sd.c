@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "disc_io.h"
 
+extern void orcus_delay(int loops);
+
 #define MMC_SPEED 10000000
 #define SD_SPEED 20000000
 #define INITIAL_SD_SPEED 400000

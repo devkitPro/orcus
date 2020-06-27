@@ -6,14 +6,10 @@
 
 typedef uint8_t uint4_t;
 
-// memory layout from linker and init function
-extern uint32_t __start_of_heap;
-
-// orcus system functions
 extern void gp2xInit();
-extern void orcus_set_ram_timings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD);
-extern void orcus_default_ram_timings();
-extern void orcus_fast_ram_timings();
+extern void gp2xSetRamTimings(int tRC, int tRAS, int tWR, int tMRD, int tRFC, int tRP, int tRCD);
+extern void gp2xSetDefaultRamTimings();
+extern void gp2xSetFastRamTimings();
 
 typedef enum { NONE, ODD, EVEN } Parity;
 extern void uartConfigure(int baudRate, int bitsPerFrame, Parity parity, int stopBits);
@@ -21,13 +17,6 @@ extern char uartPutc(char c, bool isBlocking);
 extern int uartGetc(bool isBlocking);
 extern void uartPrintf(const char* format, ...);
 extern void uartSetEcho(bool value);
-
-extern bool orcus_configure_gpio();
-
-/**
- * Delay for <loops> ticks. A tick is of arbitrary length.
- */
-extern void orcus_delay(int loops);
 
 // orcus settings
 typedef struct {

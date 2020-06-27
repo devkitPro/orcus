@@ -3,6 +3,8 @@
 #include <sys/unistd.h>
 #include <time.h>
 
+extern void orcus_delay(int loops);
+
 bool orcus_configure_gpio() {
   // lcd
   REG16(GPIOBALTFNHI) = (ALTFN1 << 14)
