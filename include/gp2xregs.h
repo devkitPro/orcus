@@ -489,4 +489,15 @@ typedef struct {
   bool ac97: 1;
 } _mmsp2_peripheral_clock_enable;
 
+#define DMACOM0 0x0200
+#define DMACOM1 0x0202
+#define DMACOM2 0x0204
+#define DMACONS 0x0206
+#define DMASRCADDR 0x0208
+#define DMATRGADDR 0x020C
+#define DMAREG(reg, channel) (reg+(0x10*channel))
+
+#define DCH0SRM 0x0100
+
+
 #endif
