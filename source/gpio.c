@@ -87,7 +87,9 @@ bool orcus_configure_gpio() {
       | (REG16(GPIOLALTFNHI) & 0xFF00);
   }
   // set GPIO L pins to SD mode
-  REG16(GPIOLALTFNLOW) = (ALTFN1 << 10)
+  REG16(GPIOLALTFNLOW) = (ALTFN1 << 14)
+    | (ALTFN1 << 12)
+    | (ALTFN1 << 10)
     | (ALTFN1 << 8)
     | (ALTFN1 << 6)
     | (ALTFN1 << 4)

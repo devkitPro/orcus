@@ -687,7 +687,9 @@ typedef enum {
    MMSP2 peripherals.
 */
 typedef enum {
-	      AC97 /** Audio codec */
+	      AC97_LRPCM = 24,
+	      AC97_SLRPCM = 25,
+	      AC97_CWPCM = 26
 } Peripheral;
 
 /**
@@ -701,6 +703,20 @@ typedef enum {
    @param destIncrement Number of words to increment destination address after each transfer (negative values and zero are permitted)
  */
 extern void dmaConfigureChannelMem(int channel, BurstMode burstMode, int8_t srcIncrement, int8_t destIncrement);
+
+/**
+   @brief Configure a DMA channel for memory-to-peripheral transfer.
+
+   Configure a DMA channel for memory-to-peripheral transfer.
+
+   @param channel DMA channel to configure (0 - 15)
+   @param burstMode Number of words to copy at a time
+   @param srcIncrement Number of words to increment source address after each transfer (negative values and zero are permitted)
+   @param destIncrement Number of words to increment destination address after each transfer (negative values and zero are permitted)
+   @param peripheral MMSP2 peripheral to write to
+ */
+extern void dmaConfigureChannelIO(int channel, BurstMode burstMode, int8_t srcIncrement, int8_t destIncrement, Peripheral peripheral);
+
 
 /**
    @brief Initiate a DMA transfer.
@@ -741,5 +757,52 @@ extern bool dmaIsTransferring(int channel);
    @param channel DMA channel to check (0 - 15)
  */
 extern bool dmaHasFinished(int channel);
+
+/**
+   @brief Start AC97 codec.
+
+   Start AC97 codec, will restart codec if it was previously started.
+
+   @note DMA channels must have been set up before calling this.
+ */
+extern void ac97Start();
+
+/**
+   @brief Read register value from AC97 codec.
+
+   Read register value from AC97 codec
+
+   @note Must have called ac97Start() before using this.
+
+   @param reg Register to read
+   @return Register value
+   @see ac97Start
+ */
+extern uint16_t ac97GetReg(uint8_t reg);
+
+/**
+   @brief Set register value in AC97 codec.
+
+   Set register value in AC97 codec.
+
+   @note Must have called ac97Start() before using this.
+
+   @param reg Register to set
+   @param value Value to set
+   @see ac97Start
+*/
+extern void ac97SetReg(uint8_t reg, uint16_t value);
+
+/**
+   @brief Set sample rate for AC97 codec.
+   
+   Set sample rate for AC97 codec.
+
+   @note Must have called ac97Start() before using this.
+
+   @param khz Sample rate to set
+   @see ac97Start
+ */
+extern void ac97SetSampleRate(uint16_t khz);
 
 #endif

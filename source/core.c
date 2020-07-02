@@ -51,7 +51,7 @@ static void arm920_gp2xInit() {
   
   bool isF200 = orcus_configure_gpio();
   orcus_configure_display(isF200);
-
+  
   // set up NAND timings
   REG16(MEMNANDTIMEW) = 0x7F8;
   

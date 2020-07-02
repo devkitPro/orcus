@@ -15,4 +15,8 @@ readelf -s framebuffer.elf | grep "__params_addr" | grep -Po ': \K[0-9A-Fa-f]+ '
 
 remove orcus_delay entirely
 
-0x88000000 - 0x00 on an F100, 0xFF on an F200
+
+3e17460:       e3a00024        mov     r0, #36 ; 0x24
+corresponds to sound_logo.c
+        CmdResult =     AC97_WriteCodecReg (0x24,0x1C67,wtimeout);      //power down enable
+
