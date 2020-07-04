@@ -36,14 +36,14 @@ bool orcus_configure_gpio() {
   REG16(GPIOBPUENB) = REG16(GPIOBPUENB) & ~0xF0;
 
   // set up memc so we can detect net2272 in F100
-  REG16(GPIOGALTFNLOW) = REG16(GPIOGALTFNLOW) // 0xaaaa
+  REG16(GPIOGALTFNLOW) = REG16(GPIOGALTFNLOW)
     | (ALTFN1 << 10)
     | (ALTFN1 << 8)
     | (ALTFN1 << 6)
     | (ALTFN1 << 4)
     | (ALTFN1 << 2);
 
-  REG16(GPIOEALTFNLOW) = (ALTFN1 << 14) // 0xaaaa
+  REG16(GPIOEALTFNLOW) = (ALTFN1 << 14)
     | (ALTFN1 << 12)
     | (ALTFN1 << 10)
     | (ALTFN1 << 8)
@@ -51,7 +51,7 @@ bool orcus_configure_gpio() {
     | (ALTFN1 << 4)
     | (ALTFN1 << 2)
     | ALTFN1;
-  REG16(GPIOEALTFNHI) = (ALTFN1 << 14) // 0xaaaa
+  REG16(GPIOEALTFNHI) = (ALTFN1 << 14)
     | (ALTFN1 << 12)
     | (ALTFN1 << 10)
     | (ALTFN1 << 8)
@@ -59,14 +59,11 @@ bool orcus_configure_gpio() {
     | (ALTFN1 << 4)
     | (ALTFN1 << 2)
     | ALTFN1;
-  REG16(GPIOIALTFNHI) = (REG16(GPIOIALTFNHI) & ~(0x3 << 4)) | (ALTFN1 << 4); //0xaaaa (mine) vs 8aaa
+  REG16(GPIOIALTFNHI) = (REG16(GPIOIALTFNHI) & ~(0x3 << 4)) | (ALTFN1 << 4);
 
-  REG16(GPIOJALTFNHI) = (REG16(GPIOJALTFNHI) & ~(0x3 << 6)) | (ALTFN1 << 6); // 0x16aa (mine) vs 0x06aa
+  REG16(GPIOJALTFNHI) = (REG16(GPIOJALTFNHI) & ~(0x3 << 6)) | (ALTFN1 << 6);
   REG16(GPIOJALTFNHI) = (REG16(GPIOJALTFNHI) & ~(0x3 << 8)) | (ALTFN1 << 8);
-
-  REG16(GPIOKALTFNLOW) = 0x0808;// (REG16(GPIOKALTFNLOW) & ~(0x3 << 2)) | (ALTFN1 << 2); // 0x8
-  //  REG16(GPIOKALTFNLOW) = (REG16(GPIOKALTFNLOW) & ~(0x3 << 10)) | (ALTFN1 << 10);
-
+  REG16(GPIOKALTFNLOW) = 0x0808;
   REG16(GPIODALTFNLOW) = (REG16(GPIODALTFNLOW) & ~(0x3 << 8)) | (OUT << 8); // 0x29aa
   // end net2272
 

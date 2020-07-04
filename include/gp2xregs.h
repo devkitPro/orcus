@@ -498,6 +498,7 @@ typedef struct {
 #define DMAREG(reg, channel) (reg+(0x10*channel))
 
 #define DCH0SRM 0x0100
+#define DCH0TRM 0x0102
 
 #define AC_CTRL_REG 0x0E00
 #define AC_STA_ENA_REG 0x0E04

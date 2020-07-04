@@ -4,19 +4,10 @@
 
 Orcus:
 	* LCD functions - blitter, yuv
-	* Audio
+	* Audio - F200 needs to be able to handle headphones properly
 	* SD card - write support
-	* NAND - erase and write
 	* F200 touchscreen
 	* Set CPU clock
 	* MMU and PU functions
 
-readelf -s framebuffer.elf | grep "__params_addr" | grep -Po ': \K[0-9A-Fa-f]+ ' | xargs printf "0x%s"
-
 remove orcus_delay entirely
-
-
-3e17460:       e3a00024        mov     r0, #36 ; 0x24
-corresponds to sound_logo.c
-        CmdResult =     AC97_WriteCodecReg (0x24,0x1C67,wtimeout);      //power down enable
-

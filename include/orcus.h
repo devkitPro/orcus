@@ -684,12 +684,10 @@ typedef enum {
 } BurstMode;
 
 /**
-   MMSP2 peripherals.
+   MMSP2 peripherals available for DMA transfers.
 */
 typedef enum {
-	      AC97_LRPCM = 24,
-	      AC97_SLRPCM = 25,
-	      AC97_CWPCM = 26
+	      AC97_LRPCM = 24
 } Peripheral;
 
 /**
@@ -768,15 +766,23 @@ extern bool dmaHasFinished(int channel);
 extern void ac97Start();
 
 /**
+   @brief Stop AC97 codec.
+
+   Stop AC97 codec.
+ */
+extern void ac97Stop();
+
+/**
    @brief Read register value from AC97 codec.
 
    Read register value from AC97 codec
 
-   @note Must have called ac97Start() before using this.
+   @note Must have called ac97Start() or audioInit() before using this.
 
    @param reg Register to read
    @return Register value
    @see ac97Start
+   @see audioInit
  */
 extern uint16_t ac97GetReg(uint8_t reg);
 
@@ -785,24 +791,93 @@ extern uint16_t ac97GetReg(uint8_t reg);
 
    Set register value in AC97 codec.
 
-   @note Must have called ac97Start() before using this.
+   @note Must have called ac97Start()  or audioInit() before using this.
 
    @param reg Register to set
    @param value Value to set
    @see ac97Start
+   @see audioInit
 */
 extern void ac97SetReg(uint8_t reg, uint16_t value);
+
+/**
+   @brief Initialise audio subsystem.
+
+   Initialise auto subsystem.
+
+   @param dmaChannel DMA channel to use for audio (0 - 15, recommend 0 - 3)
+ */
+extern void audioInit(int dmaChannel);
 
 /**
    @brief Set sample rate for AC97 codec.
    
    Set sample rate for AC97 codec.
 
-   @note Must have called ac97Start() before using this.
+   @note Must have called audioInit() before using this.
 
    @param khz Sample rate to set
    @see ac97Start
+   @see audioInit
  */
-extern void ac97SetSampleRate(uint16_t khz);
+extern void audioSetSampleRate(uint16_t khz);
+
+/**
+   @brief Mute speakers.
+
+   Mute speakers.
+ */
+extern void audioMuteSpeakers();
+
+/**
+   @brief Unmute speakers.
+
+   Unmute speakers.
+ */
+extern void audioUnmuteSpeakers();
+
+/**
+   @brief Mute headphones.
+
+   Mute headphones.
+ */
+extern void audioMuteHeadphones();
+
+/**
+   @brief Unmute headphones.
+
+   Unmute headphones.
+ */
+extern void audioUnmuteHeadphones();
+
+/**
+   @brief Set volume.
+
+   Set volume.
+
+   @param left Volume level for left channel (0 [lowest] - 31 [highest])
+   @param right Volume level for right channel (0 [lowest] - 31 [highest])
+ */
+extern void audioSetVolume(uint8_t left, uint8_t right);
+
+/**
+   @brief Play a PCM sample.
+
+   Play a PCM sample. Non-blocking, see if the sample has finished playing with audioSamplePlaying().
+
+   @param bytes Number of bytes in sample (max 0xFFFF)
+   @param data Pointer to sample data
+   @see audioSamplePlaying
+ */
+extern void audioPlaySample(uint16_t bytes, void* data);
+
+/**
+   @brief Check if a sample is currently playing.
+
+   Check if a sample is currently playing.
+
+   @return true if a sample is currently playing, false otherwise
+ */
+extern bool audioSamplePlaying();
 
 #endif
