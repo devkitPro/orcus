@@ -13,6 +13,7 @@
 #define AUDIO_BASE 0xC0000E00
 
 static int audioDmaChannel = 0;
+static bool isF200;
 
 void ac97Start() {
   REG16(AC_CTRL_REG) = BIT(2) | BIT(0);
@@ -67,7 +68,6 @@ void audioUnmuteSpeakers() {
 void audioMuteHeadphones() {
   uint16_t out = ac97GetReg(HPOUT);
   out |= BIT(15);
-  uartPrintf("Blah: 0x%x\n", out);
   ac97SetReg(HPOUT, out);
 }
 
@@ -78,6 +78,7 @@ void audioUnmuteHeadphones() {
 }
 
 void audioInit(int dmaChannel) {
+  isF200 = gp2xIsF200();
   audioDmaChannel = dmaChannel;
   dmaConfigureChannelIO(dmaChannel, WORDS_4, 1, 0, AC97_LRPCM);
   ac97Start();
@@ -94,7 +95,7 @@ void audioSetVolume(uint8_t left, uint8_t right) {
   spkReg = (spkReg & 0xC0FF) | (leftVol << 8);
   spkReg = (spkReg & 0xFFC0) | rightVol;
   ac97SetReg(SPKOUT, spkReg);
-  
+
   uint16_t hpReg = ac97GetReg(HPOUT);
   hpReg = (hpReg & 0xC0FF) | (leftVol << 8);
   hpReg = (hpReg & 0xFFC0) | rightVol;
@@ -110,6 +111,5 @@ bool audioSamplePlaying() {
 }
 
 bool audioHeadphonesConnected() {
-  // TODO
-  return false;
+  return isF200 ? false : !(REG16(GPIOLPINLVL) & BIT(11));
 }

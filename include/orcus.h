@@ -855,6 +855,8 @@ extern void audioUnmuteHeadphones();
 
    Set volume.
 
+   @warn You may not wish to allow the volume to reach 31, with headphones connected this could do damage to somebody's hearing!
+
    @param left Volume level for left channel (0 [lowest] - 31 [highest])
    @param right Volume level for right channel (0 [lowest] - 31 [highest])
  */
@@ -879,5 +881,15 @@ extern void audioPlaySample(uint16_t bytes, void* data);
    @return true if a sample is currently playing, false otherwise
  */
 extern bool audioSamplePlaying();
+
+/**
+   @brief Check if headphones are connected (F100 only).
+
+   Check if headphones are connected. This works on the F100 only, the F200 physically switches the DAC output between the speakers and headphones when you insert the jack.
+
+   @note F100 only
+   @return true if headphones are connected, false otherwise
+ */
+extern bool audioHeadphonesConnected();
 
 #endif

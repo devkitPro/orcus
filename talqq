@@ -1,0 +1,73 @@
+[1mdiff --git a/include/orcus.h b/include/orcus.h[m
+[1mindex 14bf39e..72837ee 100644[m
+[1m--- a/include/orcus.h[m
+[1m+++ b/include/orcus.h[m
+[36m@@ -855,6 +855,8 @@[m [mextern void audioUnmuteHeadphones();[m
+ [m
+    Set volume.[m
+ [m
+[32m+[m[32m   @warn You may not wish to allow the volume to reach 31, with headphones connected this could do damage to somebody's hearing![m
+[32m+[m
+    @param left Volume level for left channel (0 [lowest] - 31 [highest])[m
+    @param right Volume level for right channel (0 [lowest] - 31 [highest])[m
+  */[m
+[36m@@ -880,4 +882,14 @@[m [mextern void audioPlaySample(uint16_t bytes, void* data);[m
+  */[m
+ extern bool audioSamplePlaying();[m
+ [m
+[32m+[m[32m/**[m
+[32m+[m[32m   @brief Check if headphones are connected (F100 only).[m
+[32m+[m
+[32m+[m[32m   Check if headphones are connected. This works on the F100 only, the F200 physically switches the DAC output between the speakers and headphones when you insert the jack.[m
+[32m+[m
+[32m+[m[32m   @note F100 only[m
+[32m+[m[32m   @return true if headphones are connected, false otherwise[m
+[32m+[m[32m */[m
+[32m+[m[32mextern bool audioHeadphonesConnected();[m
+[32m+[m
+ #endif[m
+[1mdiff --git a/source/ac97.c b/source/ac97.c[m
+[1mindex 6942bb1..d5a7910 100644[m
+[1m--- a/source/ac97.c[m
+[1m+++ b/source/ac97.c[m
+[36m@@ -13,6 +13,7 @@[m
+ #define AUDIO_BASE 0xC0000E00[m
+ [m
+ static int audioDmaChannel = 0;[m
+[32m+[m[32mstatic bool isF200;[m
+ [m
+ void ac97Start() {[m
+   REG16(AC_CTRL_REG) = BIT(2) | BIT(0);[m
+[36m@@ -67,7 +68,6 @@[m [mvoid audioUnmuteSpeakers() {[m
+ void audioMuteHeadphones() {[m
+   uint16_t out = ac97GetReg(HPOUT);[m
+   out |= BIT(15);[m
+[31m-  uartPrintf("Blah: 0x%x\n", out);[m
+   ac97SetReg(HPOUT, out);[m
+ }[m
+ [m
+[36m@@ -78,6 +78,7 @@[m [mvoid audioUnmuteHeadphones() {[m
+ }[m
+ [m
+ void audioInit(int dmaChannel) {[m
+[32m+[m[32m  isF200 = gp2xIsF200();[m
+   audioDmaChannel = dmaChannel;[m
+   dmaConfigureChannelIO(dmaChannel, WORDS_4, 1, 0, AC97_LRPCM);[m
+   ac97Start();[m
+[36m@@ -94,7 +95,7 @@[m [mvoid audioSetVolume(uint8_t left, uint8_t right) {[m
+   spkReg = (spkReg & 0xC0FF) | (leftVol << 8);[m
+   spkReg = (spkReg & 0xFFC0) | rightVol;[m
+   ac97SetReg(SPKOUT, spkReg);[m
+[31m-  [m
+[32m+[m
+   uint16_t hpReg = ac97GetReg(HPOUT);[m
+   hpReg = (hpReg & 0xC0FF) | (leftVol << 8);[m
+   hpReg = (hpReg & 0xFFC0) | rightVol;[m
+[36m@@ -110,6 +111,5 @@[m [mbool audioSamplePlaying() {[m
+ }[m
+ [m
+ bool audioHeadphonesConnected() {[m
+[31m-  // TODO[m
+[31m-  return false;[m
+[32m+[m[32m  return isF200 ? false : (REG16(GPIOLPINLVL) & BIT(11));[m
+ }[m
