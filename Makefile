@@ -16,7 +16,7 @@ DATA		:=	data
 
 
 export ORCUS_MAJOR	:= 1
-export ORCUS_MINOR	:= 0
+export ORCUS_MINOR	:= 1
 export ORCUS_PATCH	:= 0
 
 VERSION	:=	$(ORCUS_MAJOR).$(ORCUS_MINOR).$(ORCUS_PATCH)

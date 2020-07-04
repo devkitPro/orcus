@@ -4,10 +4,10 @@
 
 Orcus:
 	* LCD functions - blitter, yuv
-	* Audio - F200 needs to be able to handle headphones properly
 	* SD card - write support
 	* F200 touchscreen
 	* Set CPU clock
 	* MMU and PU functions
-
+	* Interrupts - could be handy for timer, also for audio buffers running low? what about DMA transfers finishing?
+	
 remove orcus_delay entirely
