@@ -11,3 +11,23 @@ Orcus:
 	* Interrupts - could be handy for timer, also for audio buffers running low? what about DMA transfers finishing?
 	
 remove orcus_delay entirely
+
+Order to work on:
+* 2d accelerator
+* SD write (fairly simple)
+* Set CPU clock (hopefully simple)
+* Interrupts:
+   > Need a way of setting the master swi/irq/fiq functions, as well as exception handlers
+   > Provide a default IRQ and FIQ implementation where user can register a callback for a specific type of interrupt
+   > Configure whether something is an IRQ or FIQ interrupt
+   > Function for triggering SWI - EABI calls SWI 0 with the number in R7 due to caching
+   > Would like the ability to interrupt on...
+      - v/hsync
+      - DMA transfer complete
+      - timer
+      - buttons
+      - 2d accelerator finished
+      - the 920/940 interchange registers
+* I2C (looks very simple to implement so a quick win before getting into something involved)
+* MMU / PU
+* Touchscreen

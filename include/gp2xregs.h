@@ -17,6 +17,10 @@ extern void* __nand_io_base;
 #define NANDREG8(x) *((r8) (((uint32_t)&__nand_io_base)+x))
 #define NANDREG16(x) *((r16) (((uint32_t)&__nand_io_base)+x))
 
+#define FREG8(x) *((r8) (((uint32_t)&__io_base)+x+0x20000000))
+#define FREG16(x) *((r16) (((uint32_t)&__io_base)+x+0x20000000))
+#define FREG32(x) *((r32) (((uint32_t)&__io_base)+x+0x20000000))
+
 #define BIT(x) (1 << x)
 #define SET(reg, bit, onOff) ((reg&(~bit))|(onOff ? bit : 0))
 
@@ -505,5 +509,18 @@ typedef struct {
 #define AC_STATUS_REG 0x0E06
 #define AC_CODEC_DATA 0x0E0E
 #define AC_CODEC_ACCESS 0x0E10
+
+// FREG
+#define DSTCTRL 0x24000
+#define DSTADDR 0x24004
+#define DSTSTRIDE 0x24008
+#define SRCCTRL 0x2400C
+#define SRCADDR 0x24010
+#define SRCSTRIDE 0x24014
+#define SRCFORCOLOR 0x24018
+#define SRCBACKCOLOR 0x2401C
+#define SIZE 0x2402C
+#define CTRL 0x24030
+#define RUN 0x24034
 
 #endif
