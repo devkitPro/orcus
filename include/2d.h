@@ -11,7 +11,7 @@ typedef enum {
 } Angle;
 
 typedef struct {
-  void* data;
+  const void* data;
   int w;
   int h;
   RgbFormat format;
@@ -27,5 +27,9 @@ typedef struct {
 #define ROP_SRCCOPY 0xCC
 
 extern void rgbBlit(Graphic* src, Rect* sourceRect, Graphic* dest, int x, int y, bool enableTransparency);
+extern void rgb2dRun();
+extern bool rgb2dIsRunning();
+extern void rgb2dWaitComplete();
+extern void rgbSetTransparencyColour(uint16_t colour);
 
 #endif
