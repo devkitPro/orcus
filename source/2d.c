@@ -22,41 +22,28 @@ void rgbBlit(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, bool enab
   unsigned int destStride = dest->w*destBpp;
   uint32_t destAddress = ((uint32_t)((y*destStride+(x*destBpp)) + ((uint8_t*)dest->data))) & ~0x3;
 
-  uartPrintf("sourceAddr: %p, destAddr: %p\n", sourceAddress, destAddress);
-  uartPrintf("sourceStride: %u, destStride: %u\n", sourceStride, destStride);
-  uartPrintf("sourceBpp: %d, destBpp: %d\n", sourceBpp, destBpp);
-  uartPrintf("sourceFrac: %u, destFrac: %u\n", FRAC(src->format, x), FRAC(dest->format, x));
-
-  uint32_t dstctrl = (dest->format == P8BPP ? 0 : BIT(5))
+  FREG32(DSTCTRL) = (dest->format == P8BPP ? 0 : BIT(5))
     | FRAC(dest->format, x);
-  FREG32(DSTCTRL) = dstctrl;
-  uartPrintf("DSTCTRL: 0x%x\n", dstctrl);
   FREG32(DSTADDR) = destAddress;
   FREG32(DSTSTRIDE) = destStride;
 
-  uint32_t srcctrl = BIT(8)
-    | BIT(7) // TODO - is this correct?
+  FREG32(SRCCTRL) = BIT(8)
+    | BIT(7)
     | ((src->format == P8BPP ? 0 : src->format == RGB565 ? 1 : 2) << 5)
     | FRAC(src->format, srcRect->x);
-  FREG32(SRCCTRL) = srcctrl;
-  uartPrintf("SRCCTRL: 0x%x\n", srcctrl);
   FREG32(SRCADDR) = sourceAddress;
   FREG32(SRCSTRIDE) = sourceStride;
 
   unsigned int szX = (srcRect->w+x >= dest->w ? (dest->w - x) : srcRect->w) & 0x7FF;
   unsigned int szY = (srcRect->h+y >= dest->h ? (dest->h - y) : srcRect->h) & 0x7FF;
-  uartPrintf("szX: %d, szY: %d\n", szX, szY);
   FREG32(SIZE) = (szY<<16) | szX;
 
-  volatile uint32_t ctrl =
-     (dest->format == RGB565 && enableTransparency) ? BIT(11) : 0
+  FREG32(CTRL) = (((uint32_t)transparencyColour) << 16)
+    | ((dest->format == RGB565 && enableTransparency) ? BIT(11) : 0)
     | BIT(10)
     | BIT(9)
     | BIT(8)
-    | ROP_SRCCOPY
-    | (((uint32_t)transparencyColour) << 16);
-  uartPrintf("CTRL: 0x%x, rop: 0x%x, thing: 0x%x\n", ctrl, ROP_SRCCOPY);
-  FREG32(CTRL) = ctrl;
+    | ROP_SRCCOPY;
 }
 
 void rgbSet1bppFgColour(uint16_t colour) {
