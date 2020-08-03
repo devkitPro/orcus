@@ -528,5 +528,11 @@ typedef struct {
 #define SRCFORCOLOR 0x24018
 #define SRCBACKCOLOR 0x2401C
 #define PAT 0x24080
+#define ROT_CNTL 0x24100
+#define ROT_SRCSTRIDE 0x24104
+#define ROT_DSTSTRIDE 0x24108
+#define ROT_PICSIZE 0x2410C
+#define ROT_SRCADDR 0x24110
+#define ROT_DSTADDR 0x24114
 
 #endif

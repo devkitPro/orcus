@@ -42,9 +42,13 @@ extern void rgbBlit(Graphic* src, Rect* sourceRect, Graphic* dest, int x, int y,
 extern void rgbPatternFill(Graphic* dest, Rect* region, RasterPattern* pattern, bool enableTransparency);
 extern void rgbSolidFill(Graphic* dest, Rect* region, uint16_t colour);
 extern void rgbRasterOp(Graphic* src, Rect* srcRect, Graphic* dest, Rect* destRect, uint8_t rasterOp, RasterPattern* pattern, bool enableTransparency, uint16_t srcFgCol, uint16_t srcBgCol);
-extern void rgb2dRun();
-extern bool rgb2dIsRunning();
-extern void rgb2dWaitComplete();
+extern void rgbRasterRun();
+extern bool rgbRasterIsRunning();
+extern void rgbRasterWaitComplete();
 extern void rgbSetTransparencyColour(uint16_t colour);
+extern void rgbRotBlit(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, Angle angle);
+extern void rgbRotRun();
+extern bool rgbRotIsRunning();
+extern void rgbRotWaitComplete();
 
 #endif

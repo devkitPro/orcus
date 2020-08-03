@@ -83,32 +83,70 @@ void rgbRasterOp(Graphic* src, Rect* srcRect, Graphic* dest, Rect* destRect, uin
     | rasterOp;
 }
 
-void rgbSet1bppFgColour(uint16_t colour) {
-  FREG32(SRCFORCOLOR) = colour;
-}
-
-void rgbSet1bppBgColour(uint16_t colour) {
-  FREG32(SRCBACKCOLOR) = colour;
-}
-
 // only valid when dest is rgb565
 void rgbSetTransparencyColour(uint16_t colour) {
   transparencyColour = colour;
 }
 
-void rgb2dRun() {
+void rgbRasterRun() {
   FREG32(RUN) |= BIT(0);
 }
 
-bool rgb2dIsRunning() {
+bool rgbRasterIsRunning() {
   return FREG32(RUN) & BIT(0);
 }
 
-void rgb2dWaitComplete() {
-  while(rgb2dIsRunning());
+void rgbRasterWaitComplete() {
+  while(rgbRasterIsRunning());
 }
 
-// TODO - stuff involving pattern
-
+// x,y is top left corner of destination
 void rgbRotBlit(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, Angle angle) {
+  int sourceBpp = src->format == P8BPP ? 0 :
+    src->format == RGB565 ? 2 :
+    src->format == RGB888 ? 1 : 3;
+  int sourceStride = src->w*sourceBpp;
+  int destBpp = dest->format == P8BPP ? 0 :
+    dest->format == RGB565 ? 2 :
+    dest->format == RGB888 ? 1 : 3;
+  int destStride = dest->w*destBpp;
+  FREG32(ROT_DSTSTRIDE) = destStride;
+  FREG32(ROT_SRCSTRIDE) = sourceStride;
+  FREG32(ROT_PICSIZE) = (srcRect->h << 16) | srcRect->w;
+  
+  FREG32(ROT_DSTADDR) = ((uint32_t)((y*destStride+(x*destBpp)) + ((uint8_t*)dest->data)));
+
+  int posX;
+  int posY;
+  if(angle == DEG0) {
+    posX = srcRect->x;
+    posY = srcRect->y;
+  } else if(angle == DEG90) {
+    posX = srcRect->x;
+    posY = srcRect->y + srcRect->h - 1;
+  } else if(angle == DEG180) {
+    posX = srcRect->x + srcRect->w - 1;
+    posY = srcRect->y + srcRect->h - 1;
+  } else {
+    posX = srcRect->x + srcRect->w - 1;
+    posY = srcRect->y;
+  }
+  FREG32(ROT_SRCADDR) = ((uint32_t)(((sourceStride*posY) + (posX*sourceBpp) + ((uint8_t*)src->data))));
+
+  FREG32(ROT_CNTL) = (angle << 3)
+    | ((src->format == P8BPP ? 0 :
+       src->format == RGB565 ? 1 :
+       src->format == RGB888 ? 2 : 3) << 1);
+}
+
+void rgbRotRun() {
+  FREG32(ROT_CNTL) |= BIT(0);
+}
+
+bool rgbRotIsRunning() {
+  return FREG32(ROT_CNTL) & BIT(0);
+}
+
+void rgbRotWaitComplete() {
+  while(rgbRotIsRunning());
 }
