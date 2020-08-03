@@ -522,5 +522,11 @@ typedef struct {
 #define SIZE 0x2402C
 #define CTRL 0x24030
 #define RUN 0x24034
+#define PATCTRL 0x24020
+#define PATFORCOLOR 0x24024
+#define PATBACKCOLOR 0x24028
+#define SRCFORCOLOR 0x24018
+#define SRCBACKCOLOR 0x2401C
+#define PAT 0x24080
 
 #endif
