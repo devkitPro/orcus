@@ -17,36 +17,15 @@ static uint16_t transparencyColour = 0xF81F;
 volatile uint32_t* pattern = (r32) (((uint32_t)&__io_base)+0x20000000+PAT);
 
 void rgbBlit(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, bool enableTransparency) {
-  int sourceBpp = src->format == P8BPP ? 1 : 2;
-  unsigned int sourceStride = src->w*sourceBpp;
-  uint32_t sourceAddress = ((uint32_t)((srcRect->y*sourceStride+(srcRect->x*sourceBpp)) + ((uint8_t*)src->data))) & ~0x3;
+  rgbRasterOp(src, srcRect, dest, &((Rect){x, y, srcRect->w, srcRect->h}), ROP_SRCCOPY, NULL, enableTransparency, 0, 0);
+}
 
-  int destBpp = dest->format == P8BPP ? 1 : 2;
-  unsigned int destStride = dest->w*destBpp;
-  uint32_t destAddress = ((uint32_t)((y*destStride+(x*destBpp)) + ((uint8_t*)dest->data))) & ~0x3;
+void rgbSolidFill(Graphic* dest, Rect* region, uint16_t colour) {
+  rgbRasterOp(NULL, NULL, dest, region, ROP_PATCOPY, &((RasterPattern){colour, colour, B1BPP, 0}), false, 0, 0);
+}
 
-  FREG32(DSTCTRL) = (dest->format == P8BPP ? 0 : BIT(5))
-    | FRAC(dest->format, x);
-  FREG32(DSTADDR) = destAddress;
-  FREG32(DSTSTRIDE) = destStride;
-
-  FREG32(SRCCTRL) = BIT(8)
-    | BIT(7)
-    | ((src->format == P8BPP ? 0 : src->format == RGB565 ? 1 : 2) << 5)
-    | FRAC(src->format, srcRect->x);
-  FREG32(SRCADDR) = sourceAddress;
-  FREG32(SRCSTRIDE) = sourceStride;
-
-  unsigned int szX = (srcRect->w+x >= dest->w ? (dest->w - x) : srcRect->w) & 0x7FF;
-  unsigned int szY = (srcRect->h+y >= dest->h ? (dest->h - y) : srcRect->h) & 0x7FF;
-  FREG32(SIZE) = (szY<<16) | szX;
-
-  FREG32(CTRL) = (((uint32_t)transparencyColour) << 16)
-    | ((dest->format == RGB565 && enableTransparency) ? BIT(11) : 0)
-    | BIT(10)
-    | BIT(9)
-    | BIT(8)
-    | ROP_SRCCOPY;
+void rgbPatternFill(Graphic* dest, Rect* region, RasterPattern* pattern, bool enableTransparency) {
+  rgbRasterOp(NULL, NULL, dest, region, ROP_PATCOPY, pattern, enableTransparency, 0, 0);
 }
 
 void rgbRasterOp(Graphic* src, Rect* srcRect, Graphic* dest, Rect* destRect, uint8_t rasterOp, RasterPattern* pattern, bool enableTransparency, uint16_t srcFgCol, uint16_t srcBgCol) {
