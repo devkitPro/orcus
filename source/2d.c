@@ -20,6 +20,10 @@ void rgbBlit(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, bool enab
   rgbRasterOp(src, srcRect, dest, &((Rect){x, y, srcRect->w, srcRect->h}), ROP_SRCCOPY, NULL, enableTransparency, 0, 0);
 }
 
+void rgbBlit1bpp(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, bool enableTransparency, uint16_t fgCol, uint16_t bgCol) {
+  rgbRasterOp(src, srcRect, dest, &((Rect){x, y, srcRect->w, srcRect->h}), ROP_SRCCOPY, NULL, enableTransparency, fgCol, bgCol);
+}
+
 void rgbSolidFill(Graphic* dest, Rect* region, uint16_t colour) {
   rgbRasterOp(NULL, NULL, dest, region, ROP_PATCOPY, &((RasterPattern){colour, colour, B1BPP, 0}), false, 0, 0);
 }
@@ -43,13 +47,13 @@ void rgbRasterOp(Graphic* src, Rect* srcRect, Graphic* dest, Rect* destRect, uin
     FREG32(SRCADDR) = 0x0;
     FREG32(SRCSTRIDE) = 0x0;
   } else {
-    int sourceBpp = src->format == P8BPP ? 1 : 2;
-    unsigned int sourceStride = src->w*sourceBpp;
+    int sourceBpp = src->format == RGB565 ? 2 : 1;
+    unsigned int sourceStride = src->format == B1BPP ? 1 : src->w*sourceBpp;
     uint32_t sourceAddress = ((uint32_t)((srcRect->y*sourceStride+(srcRect->x*sourceBpp)) + ((uint8_t*)src->data))) & ~0x3;
 
-    FREG32(SRCBACKCOLOR) = src->format == B1BPP ? srcBgCol : 0;
     FREG32(SRCFORCOLOR) = src->format == B1BPP ? srcFgCol : 0;
-
+    FREG32(SRCBACKCOLOR) = src->format == B1BPP ? srcBgCol : 0;
+    
     FREG32(SRCCTRL) = BIT(8)
       | BIT(7)
       | ((src->format == P8BPP ? 0 : src->format == RGB565 ? 1 : 2) << 5)
@@ -104,7 +108,7 @@ void rgbRasterWaitComplete() {
 void rgbRotBlit(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, Angle angle) {
   int sourceBpp = src->format == P8BPP ? 0 :
     src->format == RGB565 ? 2 :
-    src->format == RGB888 ? 1 : 3;
+    src->format == RGB888 ? 1 : 3; // TODO - test that RGB888 = 1, the manual appears to have it swapped with RGB565
   int sourceStride = src->w*sourceBpp;
   int destBpp = dest->format == P8BPP ? 0 :
     dest->format == RGB565 ? 2 :

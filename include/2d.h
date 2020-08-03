@@ -39,6 +39,7 @@ typedef struct {
 extern volatile uint32_t* pattern;
 
 extern void rgbBlit(Graphic* src, Rect* sourceRect, Graphic* dest, int x, int y, bool enableTransparency);
+extern void rgbBlit1bpp(Graphic* src, Rect* srcRect, Graphic* dest, int x, int y, bool enableTransparency, uint16_t fgCol, uint16_t bgCol);
 extern void rgbPatternFill(Graphic* dest, Rect* region, RasterPattern* pattern, bool enableTransparency);
 extern void rgbSolidFill(Graphic* dest, Rect* region, uint16_t colour);
 extern void rgbRasterOp(Graphic* src, Rect* srcRect, Graphic* dest, Rect* destRect, uint8_t rasterOp, RasterPattern* pattern, bool enableTransparency, uint16_t srcFgCol, uint16_t srcBgCol);
