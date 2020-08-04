@@ -115,11 +115,11 @@ typedef enum {
    Bit formats in RGB region.
  */
 typedef enum {
-	      /** 4-bit palette mode, each 4 bit value (X, Y) is an index into the palette 0xXY */P4BPP = 0,
+	      /** 4-bit palette mode, each 4 bit value (X, Y) is an index into the palette 0xXY */ P4BPP = 0,
 	      /** 8-bit palette mode, each byte is an index into the palette */ P8BPP = 1,
 	      /** 16-bit RGB565 mode */ RGB565 = 2,
 	      /** 24-bit RGB888 mode */ RGB888 = 3,
-	      /** 1-bit single B/W mode */ B1BPP = 4
+	      /** 1-bit B/W mode */ B1BPP = 4
 } RgbFormat;
 
 /**
