@@ -14,7 +14,7 @@ extern bool orcus_configure_gpio();
 // memory layout from linker and init function
 extern uint32_t __start_of_heap;
 
-void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t statusBit) {
+static void setClock(uint16_t value, uint16_t setVReg, uint16_t readVReg, uint16_t statusBit) {
   REG16(setVReg) = value;
   while(REG16(CLKCHGSTREG)&statusBit);
   for(int i = 0; (i<10000000) && (REG16(readVReg) != value) ; i++);
@@ -265,4 +265,9 @@ bool gp2xIsF200() {
 
   uint8_t* memLoc = (uint8_t*) 0x88000000;
   return (*memLoc) == 0xFF;
+}
+
+#define SYS_CLK_FREQ 7372800
+void setCpuSpeed(unsigned int mhz) {
+  setClock((((((unsigned int)((mhz*1000000)*3)/SYS_CLK_FREQ)-8) << 8) | (F_PDIV << 2) | F_SDIV), FPLLSETVREG, FPLLVSETREG, CLKCHGSTREG_FPLLCHGST);
 }

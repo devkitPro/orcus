@@ -893,4 +893,11 @@ extern bool audioSamplePlaying();
  */
 extern bool audioHeadphonesConnected();
 
+/**
+   @brief Set the CPU clock speed.
+
+   Set the CPU clock speed (both ARM920T and ARM940T use the same clock source).
+ */
+extern void setCpuSpeed(unsigned int mhz);
+
 #endif
