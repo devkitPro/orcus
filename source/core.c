@@ -96,7 +96,7 @@ uint32_t timerSet(uint32_t count) {
   return currentCount;
 }
 
-void timerSleepNs(unsigned int ns) {
+void timerSleepNs(unsigned long ns) {
   uint32_t start = timerGet();
   uint32_t end = start + (ns / 135);
   if(end < start) {
@@ -105,10 +105,10 @@ void timerSleepNs(unsigned int ns) {
   while(timerGet() < end);
 }
 
-unsigned int timerNsSince(uint32_t lastTick, uint32_t* storeCurrent) {
+unsigned long timerNsSince(uint32_t lastTick, uint32_t* storeCurrent) {
   uint32_t currentTick = timerGet();
-  int ticksSince = (currentTick < lastTick) ? ((0xFFFFFFFF - lastTick) + currentTick)  : (currentTick - lastTick);
-  int nsSince = ticksSince * TIMER_NS_PER_TICK;
+  unsigned long ticksSince = (currentTick < lastTick) ? ((0xFFFFFFFF - lastTick) + currentTick)  : (currentTick - lastTick);
+  unsigned long nsSince = ticksSince * TIMER_NS_PER_TICK;
 
   if(storeCurrent != NULL) {
     *storeCurrent = currentTick;
@@ -268,6 +268,6 @@ bool gp2xIsF200() {
 }
 
 #define SYS_CLK_FREQ 7372800
-void setCpuSpeed(unsigned int mhz) {
+void gp2xSetCpuSpeed(unsigned int mhz) {
   setClock((((((unsigned int)((mhz*1000000)*3)/SYS_CLK_FREQ)-8) << 8) | (F_PDIV << 2) | F_SDIV), FPLLSETVREG, FPLLVSETREG, CLKCHGSTREG_FPLLCHGST);
 }

@@ -1,11 +1,12 @@
 /*! \file 2d.h
-    \brief 2D accelerator support
+    \brief 2D accelerator
  */
 
-#ifndef __2D_H__
-#define __2D_H__
+#ifndef __ORCUS_2D_H__
+#define __ORCUS_2D_H__
 
-#include <orcus.h>
+#include <stdint.h>
+#include <rgb.h>
 
 /**
    Rotation angle.

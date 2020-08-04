@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <gp2xregs.h>
 #include <orcus.h>
+#include <nand.h>
 
 void nandRead(uint32_t startAddr, int numberOfBlocks, void* dest) {
   uint16_t* d = (uint16_t*) dest;
