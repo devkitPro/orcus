@@ -10,6 +10,7 @@
   - Cache control... // https://developer.arm.com/documentation/ddi0151/c/programmer-s-model/cp15-register-map-summary/register-7--cache-operations-register
   - Descriptors... https://developer.arm.com/documentation/ddi0151/c/memory-management-unit/address-translation/section-descriptor
   - TTB... https://developer.arm.com/documentation/ddi0151/c/programmer-s-model/cp15-register-map-summary/register-2--translation-table-base--ttb--register
+  - PU on 940... https://developer.arm.com/documentation/ddi0092/b/protection-unit?lang=en
 */
 
 void cacheEnableI() {
