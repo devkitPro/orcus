@@ -2,6 +2,32 @@
     \brief Main header file for Orcus functions
  */
 
+/*!
+  \mainpage Orcus API Reference
+
+  \section into Introduction
+  Orcus is a bare metal library for GP2X (F100 and F200) development, intended for use on top of devkitARM.
+
+  \section core Core
+  - \ref orcus.h "Basic GP2X initialisation"
+  - \ref timer.h "Hardware timer"
+  - \ref uart.h "UART"
+  - \ref dma.h "DMA"
+  - \ref arm940.h "ARM940T"
+  - \ref sd.h "SD card"
+  \section video Video
+  - \ref lcd.h "LCD control"
+  - \ref rgb.h "RGB layers"
+  - \ref 2d.h "2D accelerator"
+  \section audio Audio
+  - \ref audio.h "AC97 codec and PCM audio"
+
+  \section external_links Links
+  - <a href="http://www.devkitpro.org/">devkitPro</a>
+  - <a href="https://github.com/devkitPro/orcus">Orcus github</a>
+  - <a href="https://github.com/devkitPro/gp2x-examples">Examples</a>
+ */
+
 #ifndef __ORCUS_H__
 #define __ORCUS_H__
 
