@@ -1,5 +1,7 @@
+#define _GNU_SOURCE
+
 #include <stdint.h>
-#include <stdlib.h>
+#include <malloc.h>
 #include <gp2xregs.h>
 #include <orcus.h>
 
@@ -112,9 +114,9 @@ void mmuDisable() {
 }
 
 uint32_t* mmuNewL1Table() {
-  uint32_t* l1Table = NULL;
+  uint32_t* l1Table = (uint32_t*) memalign(MMU_L1_ALIGN, 0x4000);
   // allocate a table of 4096 x 32-bit entries aligned to a 16K boundary
-  if(posix_memalign((void**)&l1Table, MMU_L1_ALIGN, 0x4000) == 0) {
+  if(l1Table != NULL) {
     for(int i = 4096 ; i-- ; ) {
       l1Table[i] = i < 64 ? SECTION_DESCRIPTOR(i*SZ_1M, AP(READ_WRITE, true), 0, true, true)
       	: SECTION_DESCRIPTOR(i*SZ_1M, AP(READ_WRITE, true), 0, false, false);
@@ -134,8 +136,9 @@ uint32_t mmuSetDomainAccess(unsigned int domain, DomainAccess access) {
                 and %0, %0, %1;  \
                 orr %0, %0, %2;  \
                 mcr p15, 0, %0, c3, c0, 0"
-	       :"=r"(domainAccess)
+	       :"+r"(domainAccess)
 	       :"r"(mask), "r"(accessBits)
+	       :"cc"
 	       );
 
   return domainAccess;
