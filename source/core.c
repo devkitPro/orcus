@@ -28,7 +28,8 @@ static void arm920_gp2xInit() {
   setClock(((A_MDIV << 8) | (A_PDIV << 2) | A_SDIV), APLLSETVREG, APLLVSETREG, CLKCHGSTREG_APLLCHGST);
   REG16(CLKMGRREG) = CLKMGRREG_APLL_USE | CLKMGRREG_UPLL_USE;
 
-  enableICache();
+  cacheInvalidateI();
+  cacheEnableI();
   
   // configure syscalls
   orcus_init_syscalls();

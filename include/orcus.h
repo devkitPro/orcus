@@ -10,6 +10,7 @@
 
   \section core Core
   - \ref orcus.h "Basic GP2X initialisation"
+  - \ref cachemmu.h "Caches, MMU and PU"
   - \ref timer.h "Hardware timer"
   - \ref uart.h "UART"
   - \ref dma.h "DMA"
@@ -43,9 +44,10 @@
 #include <lcd.h>
 #include <dma.h>
 #include <timer.h>
+#include <cachemmu.h>
 
 /**
-   @brief Initialise GP2X
+   @brief Initialise GP2X.
 
    Initialise the GP2X hardware and set up system calls. This must be called before using any other functions from Orcus.
  */
@@ -148,13 +150,5 @@ extern uint32_t btnStateDebounced();
    @return true if running on an F200, false if running on an F100
  */
 extern bool gp2xIsF200();
-
-/**
-   @brief Enable icache on ARM920T
-
-   Enable icache on ARM920T. This is enabled by default in gp2xInit.
-   @warning This may have unexpected effects if called from the ARM940T
- */
-extern void enableICache();
 
 #endif
