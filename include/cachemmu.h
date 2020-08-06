@@ -16,12 +16,22 @@
 
 #define SZ_1M 0x100000
 
+/**
+   @brief Access permissions for MMU domains.
+
+   Access permissions for MMU domains.
+ */
 typedef enum {
 	      /** Do not allow any access */ NO_ACCESS = 0x0,
 	      /** Respect the permission bits in the translation table */ CLIENT = 0x1,
 	      /** Ignore the permission bits in the translation table */ MANAGER = 0x3
 } DomainAccess;
 
+/**
+   @brief Access permissions for MMU pages.
+
+   Access permissions for MMU pages.
+ */
 typedef enum {
 	      /** Read-write */ READ_WRITE = 0x0,
 	      /** Read-only */ READ_ONLY = 0x2
@@ -46,11 +56,11 @@ typedef enum {
    @param physicalAddress 1MB aligned physical address of section
    @param ap Access permissions
    @param domain Domain for this section (0 - 15)
-   @param cachable Section should be cachable
+   @param cacheable Section should be cacheable
    @param buffered Section should be buffered
    @see AP
  */
-#define SECTION_DESCRIPTOR(physicalAddr, ap, domain, cachable, buffered) (((physicalAddr) & 0xFFF00000) | (ap << 10) | (domain << 5) | BIT(4) | ((cachable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x2)
+#define SECTION_DESCRIPTOR(physicalAddr, ap, domain, cacheable, buffered) (((physicalAddr) & 0xFFF00000) | (ap << 10) | (domain << 5) | BIT(4) | ((cacheable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x2)
 
 // 256 entries for large (64k) or small (4k) pages
 /**
@@ -83,11 +93,11 @@ typedef enum {
    @param ap2 Access permissions for third 16K subpage
    @param ap1 Access permissions for second 16K subpage
    @param ap0 Access permissions for first 16K subpage
-   @param cachable Section should be cachable
+   @param cacheable Section should be cacheable
    @param buffered Section should be buffered
    @see AP
  */
-#define LARGE_DESCRIPTOR(physicalAddr, ap3, ap2, ap1, ap0, cachable, buffered) ((physicalAddr & 0xFFFF0000) | (ap3 << 10) | (ap2 << 8) | (ap1 << 6) | (ap0 << 4) | ((cachable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x1)
+#define LARGE_DESCRIPTOR(physicalAddr, ap3, ap2, ap1, ap0, cacheable, buffered) ((physicalAddr & 0xFFFF0000) | (ap3 << 10) | (ap2 << 8) | (ap1 << 6) | (ap0 << 4) | ((cacheable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x1)
 
 /**
    @brief Define a small (4K) descriptor.
@@ -99,11 +109,11 @@ typedef enum {
    @param ap2 Access permissions for third 4K subpage
    @param ap1 Access permissions for second 4K subpage
    @param ap0 Access permissions for first 4K subpage
-   @param cachable Section should be cachable
+   @param cacheable Section should be cacheable
    @param buffered Section should be buffered
    @see AP
  */
-#define SMALL_DESCRIPTOR(physicalAddr, ap3, ap2, ap1, ap0, cachable, buffered) ((physicalAddr & 0xFFFFF000) | (ap3 << 10) | (ap2 << 8) | (ap1 << 6) | (ap0 << 4) | ((cachable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x2)
+#define SMALL_DESCRIPTOR(physicalAddr, ap3, ap2, ap1, ap0, cacheable, buffered) ((physicalAddr & 0xFFFFF000) | (ap3 << 10) | (ap2 << 8) | (ap1 << 6) | (ap0 << 4) | ((cacheable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x2)
 
 
 /**
@@ -113,16 +123,70 @@ typedef enum {
 
    @param physicalAddr 4K aligned physical address of page
    @param ap Access permissions
-   @param cachable Section should be cachable
+   @param cacheable Section should be cacheable
    @param buffered Section should be buffered
    @see AP
  */
-#define TINY_DESCRIPTOR(physicalAddr, ap3, ap2, ap1, ap0, cachable, buffered) ((physicalAddr & 0xFFFFFC00) | (ap << 4) | ((cachable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x3)
+#define TINY_DESCRIPTOR(physicalAddr, ap3, ap2, ap1, ap0, cacheable, buffered) ((physicalAddr & 0xFFFFFC00) | (ap << 4) | ((cacheable ? 1 : 0) << 3) | ((buffered ? 1 : 0) << 2) | 0x3)
+
+/**
+   @brief Protection Unit memory region sizes.
+
+   Protection Unit memory region sizes.
+ */
+typedef enum {
+	      PU_4K = 0b01011,
+	      PU_8K = 0b01100,
+	      PU_16K = 0b01101,
+	      PU_32K = 0b01110,
+	      PU_64K = 0b01111,
+	      PU_128K = 0b10000,
+	      PU_256K = 0b10001,
+	      PU_512K = 0b10010,
+	      PU_1M = 0b10011,
+	      PU_2M = 0b10100,
+	      PU_4M = 0b10101,
+	      PU_8M = 0b10110,
+	      PU_16M = 0b10111,
+	      PU_32M = 0b11000,
+	      PU_64M = 0b11001,
+	      PU_128M = 0b11010,
+	      PU_256M = 0b11011,
+	      PU_512M = 0b11100,
+	      PU_1G = 0b11101,
+	      PU_2G = 0b11110,
+	      PU_4G = 0b11111
+} PUAreaSize;
+
+/**
+   @brief Define a PU memory region for the ARM940T.
+
+   Define a PU memory region for the ARM940T.
+
+   @note This does not apply to the ARM920T, where there is a full MMU.
+
+   @see PUAreaSize
+ */
+#define PU_REGION(baseAddress, areaSize, enabled) ((baseAddress & 0xFFFFF000) | (areaSize << 1) | (enabled ? 1 : 0))
+
+/**
+   @brief Access permissions for PU memory regions.
+
+   Access permissions for PU memory regions.
+ */
+typedef enum {
+	      /** No access */ PU_NO_ACCESS = 0x0,
+	      /** Only privileged mode access */ PU_PRIVILEGED_ONLY = 0x1,
+	      /** Full access from privileged mode, read-only access from user mode */ PU_PRIVILEGED_RW_USER_RO = 0x2,
+	      /** Full access from both privileged and user modes */ PU_FULL_ACCESS = 0x3
+} PUAccess;
 
 /**
    @brief Configures MMU domain access.
 
    Configures MMU domain access.
+
+   @note ARM920T-only
 
    @param domain Domain to configure (0 - 15)
    @param access Access permissions to assign to domain
@@ -135,13 +199,19 @@ extern uint32_t mmuSetDomainAccess(unsigned int domain, DomainAccess access);
 
    Allocates and populates a new L1 MMU table. This will by default enable caching and buffering for the first 64M 
    of the address space (i.e. RAM) using 1M section descriptors set to domain 0.
+
+   @note ARM920T-only
+
+   @return A pointer to a correctly aligned L1 MMU table
  */
 extern uint32_t* mmuNewL1Table();
 
 /**
-   @brief Enables the MMU.
+   @brief Enable the MMU.
 
-   Enables the MMU.
+   Enable the MMU.
+
+   @note ARM920T-only
 
    @param l1Table Pointer to 16K aligned L1 translation table
 
@@ -150,10 +220,22 @@ extern uint32_t* mmuNewL1Table();
 extern void mmuEnable(void* l1Table);
 
 /**
+   @brief Disable the MMU.
+
+   Disable the MMU.
+
+   @note This will also disable the data cache.
+   @note ARM920T-only
+ */
+extern void mmuDisable();
+
+/**
    @brief Enables MMU along with data and instruction caches.
 
    Enables MMU along with data and instruction caches. This uses a basic setup as per mmuNewL1Table() which 
    should be sufficient for most use cases.
+
+   @note ARM920T-only
 
    @see mmuNewL1Table
  */
@@ -214,5 +296,54 @@ extern void cacheInvalidateD();
  */
 extern void cacheInvalidateDI();
 
+/**
+   @brief Enable the PU.
+
+   Enable the PU.
+
+   @note You must have configured a region before calling this.
+
+   @see puSetDRegion
+   @see puSetIRegion
+ */
+extern void puEnable();
+
+/**
+   @brief Disable the PU.
+
+   Disable the PU.
+
+   @note This will also disable the data cache.
+ */
+extern void puDisable();
+
+/**
+   @brief Configure a PU data memory region.
+
+   Configure a PU data memory region.
+
+   @param region Region to figure (0 - 7)
+   @param params Basic region params (defined using PU_REGION)
+   @param access Access permissions for region
+   @param cacheable Whether region is cacheable
+   @param buffered Whether region is buffered
+   @see PU_REGION
+ */
+extern void puSetDRegion(unsigned int region, uint32_t params, PUAccess access, bool cacheable, bool buffered);
+
+/**
+   @brief Configure a PU instruction memory region.
+
+   Configure a PU instruction memory region.
+
+   @note The instruction cache is not bufferable.
+
+   @param region Region to figure (0 - 7)
+   @param params Basic region params (defined using PU_REGION)
+   @param access Access permissions for region
+   @param cacheable Whether region is cacheable
+   @see PU_REGION
+ */
+extern void puSetIRegion(unsigned int region, uint32_t params, PUAccess access, bool cacheable);
 
 #endif
