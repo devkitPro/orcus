@@ -215,4 +215,15 @@ extern void rgbPrintf(uint16_t* fb, int x, int y, uint16_t colour, const char* f
  */
 extern void rgbPrintfBg(uint16_t* fb, int x, int y, uint16_t colour, uint16_t bgColour, const char* format, ...);
 
+/**
+   @brief Set colour palette for 4 or 8 bit modes.
+
+   Set colour palette for 4 or 8 bit modes. A palette can be up to 256 entries long (only the first 16 are used in 4bpp mode).
+
+   @param colours Pointer to array of colour data in RGB888x format
+   @param count Number of palette entries to set
+   @param startIdx First palette index to set
+ */
+extern void rgbSetPalette(uint32_t* colours, int count, uint8_t startIdx);
+
 #endif

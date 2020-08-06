@@ -62,14 +62,12 @@ void rgbToggleRegion(RgbRegion region, bool onOff) {
 }
 
 
-// Not public
-void orcus_rgb_blend(RgbRegion region, BlendingMode mode) {
+static void orcus_rgb_blend(RgbRegion region, BlendingMode mode) {
   int shift = (region-1) * 2;
   REG16(MLC_STL_MIXMUX) = (REG16(MLC_STL_MIXMUX) & ~(3 << shift)) | (mode << shift);
 }
 
-// Not public
-void orcus_rgb_set_alpha(RgbRegion region, uint4_t alpha) {
+static void orcus_rgb_set_alpha(RgbRegion region, uint4_t alpha) {
   int shift = region <= 3 ? (region * 4) : ((region - 3) * 4);
   uint8_t masked_alpha = alpha & 0xF;
 
@@ -135,6 +133,14 @@ void rgbSetRegionPosition(RgbRegion region, int x, int y, int width, int height)
     REG16(baseAddr+2) = x + width - 1;
     REG16(baseAddr+4) = y;
     REG16(baseAddr+6) = y + height - 1;
+  }
+}
+
+void rgbSetPalette(uint32_t* colours, int count, uint8_t startIdx) {
+  REG16(MLC_STL_PALLT_A) = ((uint16_t)startIdx)*2;
+  for(int i = count ; i-- ; ) {
+    REG16(MLC_STL_PALLT_D) = (colours[i] >> 8) & 0xFFFF; // write G8B8 first
+    REG16(MLC_STL_PALLT_D) = (colours[i] >> 24) & 0xFFFF; // write R8 second
   }
 }
 

@@ -377,6 +377,9 @@ extern r32 _fiq;
 #define MLC_STL_EADRL 0x2912
 #define MLC_STL_EADRH 0x2914
 
+#define MLC_STL_PALLT_A 0x2958
+#define MLC_STL_PALLT_D 0x295A
+
 #define MLC_STLn_STX 0x28E2
 
 #define MLC_OVLAY_CNTR 0x2880
