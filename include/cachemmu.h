@@ -186,7 +186,7 @@ typedef enum {
 
    Configures MMU domain access.
 
-   @note ARM920T-only
+   @note ARM920T only
 
    @param domain Domain to configure (0 - 15)
    @param access Access permissions to assign to domain
@@ -200,7 +200,7 @@ extern uint32_t mmuSetDomainAccess(unsigned int domain, DomainAccess access);
    Allocates and populates a new L1 MMU table. This will by default enable caching and buffering for the first 64M 
    of the address space (i.e. RAM) using 1M section descriptors set to domain 0.
 
-   @note ARM920T-only
+   @note ARM920T only
 
    @return A pointer to a correctly aligned L1 MMU table
  */
@@ -211,7 +211,7 @@ extern uint32_t* mmuNewL1Table();
 
    Enable the MMU.
 
-   @note ARM920T-only
+   @note ARM920T only
 
    @param l1Table Pointer to 16K aligned L1 translation table
 
@@ -225,7 +225,7 @@ extern void mmuEnable(void* l1Table);
    Disable the MMU.
 
    @note This will also disable the data cache.
-   @note ARM920T-only
+   @note ARM920T only
  */
 extern void mmuDisable();
 
@@ -235,7 +235,7 @@ extern void mmuDisable();
    Enables MMU along with data and instruction caches. This uses a basic setup as per mmuNewL1Table() which 
    should be sufficient for most use cases.
 
-   @note ARM920T-only
+   @note ARM920T only
 
    @see mmuNewL1Table
  */
@@ -302,6 +302,7 @@ extern void cacheInvalidateDI();
    Enable the PU.
 
    @note You must have configured a region before calling this.
+   @note ARM940T only
 
    @see puSetDRegion
    @see puSetIRegion
@@ -312,6 +313,7 @@ extern void puEnable();
    @brief Disable the PU.
 
    Disable the PU.
+   @note ARM940T only
 
    @note This will also disable the data cache.
  */
@@ -321,6 +323,7 @@ extern void puDisable();
    @brief Configure a PU data memory region.
 
    Configure a PU data memory region.
+   @note ARM940T only
 
    @param region Region to figure (0 - 7)
    @param params Basic region params (defined using PU_REGION)
@@ -337,6 +340,7 @@ extern void puSetDRegion(unsigned int region, uint32_t params, PUAccess access, 
    Configure a PU instruction memory region.
 
    @note The instruction cache is not bufferable.
+   @note ARM940T only
 
    @param region Region to figure (0 - 7)
    @param params Basic region params (defined using PU_REGION)
