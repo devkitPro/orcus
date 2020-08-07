@@ -350,4 +350,14 @@ extern void puSetDRegion(unsigned int region, uint32_t params, PUAccess access, 
  */
 extern void puSetIRegion(unsigned int region, uint32_t params, PUAccess access, bool cacheable);
 
+/**
+   @brief Enables PU along with data and instruction caches.
+
+   Enables MMU along with data and instruction caches. This uses a basic setup where all RAM is cached and 
+   buffered, which should be sufficient for most use cases.
+
+   @note ARM940T only
+ */
+extern void puCachesInitOn();
+
 #endif

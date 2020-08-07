@@ -145,10 +145,10 @@ uint32_t mmuSetDomainAccess(unsigned int domain, DomainAccess access) {
 }
 
 void mmuCachesInitOn() {
+  cacheInvalidateDI();
   cacheEnableI();
   mmuSetDomainAccess(0, MANAGER);
   mmuEnable(mmuNewL1Table());
-  cacheInvalidateDI();
   cacheEnableD();
 }
 
@@ -507,6 +507,17 @@ void puSetIRegion(unsigned int region, uint32_t params, PUAccess access, bool ca
   }
 }
 
+void puEnable() {
+  asm volatile("mov r0, #0;  \
+	        mrc p15, 0, r0, c1, c0, 0;  \
+                orr r0, r0, #0x1;  \
+	        mcr p15, 0, r0, c1, c0, 0"
+	       : // no outputs
+	       : // no inputs
+	       :"r0"
+	       );
+}
+
 // also disables dcache
 void puDisable() {
   asm volatile("mov r0, #0;  \
@@ -517,4 +528,13 @@ void puDisable() {
 	       : // no inputs
 	       :"r0"
 	       );
+}
+
+void puCachesInitOn() {
+  cacheInvalidateDI();
+  cacheEnableI();
+  puSetDRegion(0, PU_REGION(0x0, PU_64M, true), PU_FULL_ACCESS, true, true);
+  puSetIRegion(0, PU_REGION(0x0, PU_64M, true), PU_FULL_ACCESS, true);
+  puEnable();
+  cacheEnableD();
 }

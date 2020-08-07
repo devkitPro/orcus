@@ -122,6 +122,8 @@ extern void rgbSetFbAddress(void* fb);
 
    Set region coordinates and size.
 
+   @note REGION5 cannot be moved or resized, it is always 320x240 starting at (0, 0).
+
    @param region Region to alter
    @param x X-coordinate of start of region
    @param y Y-coordinate of start of region
