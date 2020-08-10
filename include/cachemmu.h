@@ -201,6 +201,7 @@ extern uint32_t mmuSetDomainAccess(unsigned int domain, DomainAccess access);
    of the address space (i.e. RAM) using 1M section descriptors set to domain 0.
 
    @note ARM920T only
+   @warning This should only be called after gp2xInit as it allocates memory
 
    @return A pointer to a correctly aligned L1 MMU table
  */
@@ -236,6 +237,7 @@ extern void mmuDisable();
    should be sufficient for most use cases.
 
    @note ARM920T only
+   @warning This should only be called after gp2xInit as it allocates memory
 
    @see mmuNewL1Table
  */
