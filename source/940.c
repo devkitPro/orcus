@@ -46,12 +46,16 @@ int arm940Init(int memoryBank) {
   return 0;
 }
 
-// TODO - could we use CP15 r0 for this? It contains the part number, and may be nicer than using a linker symbol
-#pragma GCC optimize ("O0")
 bool arm940IsThis() {
-  return ((int)&__is_arm940) == 1;
+  uint32_t idCode;
+  asm volatile("mrc p15, 0, %[idCode], c0, c0, 0"
+	       :[idCode] "=r" (idCode)
+	       : // no inputs
+	       );
+  return ((idCode >> 4) & 0xFFF) == 0x940;
 }
 
+#pragma GCC optimize ("O0")
 void* importPointer(uint32_t addr) {
   int bank = ((int)&__arm940_bank);
   if(arm940IsThis()) {
