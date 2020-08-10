@@ -80,13 +80,47 @@ void cacheInvalidateD() {
 	       );	       
 }
 
+void cacheCleanD() {
+  bool isArm940 = arm940IsThis();
+
+  if(!isArm940) {
+    for(uint32_t segment = 0 ; segment < 8 ; segment++) {
+      for(uint32_t index = 0 ; index < 64 ; index++) {
+	uint32_t r = (index << 26) | (segment << 5);
+	asm volatile("mcr p15, 0, %[r], c7, c10, 2"
+		     : // no outputs
+		     : [r] "r" (r)
+		     );
+      }
+    }
+  } else {
+    for(uint32_t segment = 0 ; segment < 8 ; segment++) {
+      for(uint32_t index = 0 ; index < 64 ; index++) {
+	uint32_t r = (index << 26) | (segment << 5);
+	asm volatile("mcr p15, 0, %[r], c7, c10, 1"
+		     : // no outputs
+		     : [r] "r" (r)
+		     );
+      }
+    }
+  }
+}
+
 void cacheInvalidateDI() {
-  asm volatile("mov r0, #0;  \
-                mcr p15, 0, r0, c7, c7, 0"
-	       : // no outputs
-	       : // no inputs
-	       :"r0"
-	       );	       
+  bool isArm940 = arm940IsThis();
+  uint32_t r = 0x0;
+  
+  if(!isArm940) {
+    asm volatile("mcr p15, 0, %[r], c7, c7, 0"
+		 : // no outputs
+		 :[r] "r" (r)
+		 );
+  } else {
+    asm volatile("mcr p15, 0, %[r], c7, c5, 0; \
+		  mcr p15, 0, %[r], c7, c6, 0"
+		 : // no outputs
+		 :[r] "r" (r));
+  }
 }
 
 void mmuEnable(void* l1Table) {

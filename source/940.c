@@ -46,6 +46,7 @@ int arm940Init(int memoryBank) {
   return 0;
 }
 
+// TODO - could we use CP15 r0 for this? It contains the part number, and may be nicer than using a linker symbol
 #pragma GCC optimize ("O0")
 bool arm940IsThis() {
   return ((int)&__is_arm940) == 1;

@@ -289,6 +289,13 @@ extern void cacheDisableD();
 extern void cacheInvalidateD();
 
 /**
+   @brief Clean entire data cache.
+
+   Clean entire data cache (i.e. write it back to memory).
+ */
+extern void cacheCleanD();
+
+/**
    @brief Invalidate both data and instruction caches.
 
    Invalidate both data and instruction caches.
