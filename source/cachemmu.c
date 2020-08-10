@@ -567,8 +567,10 @@ void puDisable() {
 void puCachesInitOn() {
   cacheInvalidateDI();
   cacheEnableI();
-  puSetDRegion(0, PU_REGION(0x0, PU_64M, true), PU_FULL_ACCESS, true, true);
-  puSetIRegion(0, PU_REGION(0x0, PU_64M, true), PU_FULL_ACCESS, true);
+  puSetDRegion(7, PU_REGION(0x0, PU_64M, true), PU_FULL_ACCESS, true, true);
+  puSetIRegion(7, PU_REGION(0x0, PU_64M, true), PU_FULL_ACCESS, true);
+  puSetIRegion(0, PU_REGION(0x0, PU_4G, true), PU_FULL_ACCESS, false);
+  puSetDRegion(0, PU_REGION(0x0, PU_4G, true), PU_FULL_ACCESS, false, false);
   puEnable();
   cacheEnableD();
 }

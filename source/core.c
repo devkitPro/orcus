@@ -63,6 +63,9 @@ static void arm920_gp2xInit() {
 }
 
 static void arm940_gp2xInit() {
+  cacheInvalidateI();
+  cacheEnableI();
+  
   orcus_init_syscalls();
   
   extern void* heap_ptr;
