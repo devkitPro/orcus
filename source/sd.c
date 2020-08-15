@@ -218,6 +218,57 @@ int sdReadBlocks(int startBlock, int numberOfBlocks, uint8_t* dest) {
   return 0;
 }
 
+int sdWriteBlocks(int startBlock, int numberOfBlocks, uint8_t* src) {
+  int attempts = 0;
+
+ CMD25:
+  REG16(SDICmdSta) = 0xFFFF;
+  REG16(SDIDatSta) = 0x07FF;
+  REG16(SDIDatConL) = (3 << 12) | numberOfBlocks;
+  REG16(SDIDatConH) = 0x0012;
+  REG16(SDICON) |= BIT(1); // clear the FIFO before we try to write
+
+  if(sd_cmd(25, startBlock*(isSDHC ? 1 : 512), true, false, false)) {
+    if(cmd13()&0x400000) { // sometimes the card seems to get confused and stuck in data mode, reinit if we start getting illegal command responses
+      sdInit();
+    }
+    if(attempts > 5) {
+      return 1;
+    } else {
+      attempts++;
+      usleep(20000);
+      goto CMD25;
+    }
+  } else {
+    REG16(SDICmdSta) = 0x1E00;
+
+    for(int block = 0 ; block < numberOfBlocks ; block++) {
+      for(int byte = 0 ; byte < 512 ; byte++) { // TODO - handle different block sizes
+	uint32_t currentTimer = timerGet();
+	while((REG16(SDIFSTA)&0x2000) == 0) {
+	  if(timerNsSince(currentTimer, NULL) > 33750000) {
+	    goto CMD25;
+	  }
+	}
+	REG8(SDIDAT) = src[(block*512)+byte];
+      }
+    }
+
+    REG16(SDIDatConL) |= BIT(14);
+    REG16(SDICON) |= BIT(1);
+
+    if(sd_cmd(12, 0, true, false, false)) {
+      return 2;
+    }
+
+    REG16(SDICON) |= BIT(1);
+
+    REG16(SDIDatConL) = 0xFFFF;
+    REG16(SDIDatConH) = 0xFFFF;
+  }
+
+  return 0;
+}
 
 bool sd_Startup() {
   return sdIsInserted() && !sdInit();
@@ -232,7 +283,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors, void* buffer) {
 }
 
 bool sd_WriteSectors(sec_t sector, sec_t numSectors, const void* buffer) {
-  return true;
+  return !sdWriteBlocks(sector, numSectors, (uint8_t*) buffer);
 }
 
 bool sd_ClearStatus() {
@@ -247,7 +298,7 @@ bool sd_Shutdown() {
 
 const DISC_INTERFACE __io_gp2xsd = {
 	DEVICE_TYPE_GP2X_SD,
-	FEATURE_MEDIUM_CANREAD,// | FEATURE_MEDIUM_CANWRITE, // TODO - enable writing
+	FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE,
 	(FN_MEDIUM_STARTUP)&sd_Startup,
 	(FN_MEDIUM_ISINSERTED)&sdIsInserted,
 	(FN_MEDIUM_READSECTORS)&sd_ReadSectors,
