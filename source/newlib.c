@@ -35,7 +35,7 @@ static _ssize_t _uart_write_r(struct _reent *r, void *fd, const char *ptr, size_
   for(int i = 0 ; i < len ; i++) {
     uartPutc(ptr[i], true);
   }
-        
+
   return len;
 }
 
@@ -72,8 +72,11 @@ static const devoptab_t dotab_stdin = {
         NULL
 };
 
+int __SYSCALL(nanosleep)(const struct timespec *req, struct timespec *rem) {
+  return orcus_nanosleep(req,rem);
+}
+
 void orcus_init_syscalls() {
-  __syscalls.nanosleep = &orcus_nanosleep;
   devoptab_list[STD_OUT] = &dotab_stdout;
   devoptab_list[STD_ERR] = &dotab_stdout;
   devoptab_list[STD_IN] = &dotab_stdin;
